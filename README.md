@@ -1,4 +1,3 @@
-# Automatic Marcus v1
+# Automatic Marcus
 
-A fully customizable 3D printed foam dart gun powered with an Arduino.
-
+A 3D printed foam dart gun powered with an Arduino.
