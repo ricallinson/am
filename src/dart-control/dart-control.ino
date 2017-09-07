@@ -16,8 +16,8 @@ const int UPPER_FLYWHEEL = 10;    // Digital 10
 const int ONE_SECOND = 1000;
 const int FLYWHEEL_MIN_VALUE = 1060;
 const int FLYWHEEL_MAX_VALUE = 1860;
-const int FLYWHEEL_MID_VALUE = FLYWHEEL_MIN_VALUE + ((FLYWHEEL_MAX_VALUE - FLYWHEEL_MIN_VALUE) / 2); // ~1440;
-const int FLYWHEEL_STOP_VALUE = FLYWHEEL_MID_VALUE - 50;
+//const int FLYWHEEL_MID_VALUE = FLYWHEEL_MIN_VALUE + ((FLYWHEEL_MAX_VALUE - FLYWHEEL_MIN_VALUE) / 2); // ~1440;
+//const int FLYWHEEL_STOP_VALUE = FLYWHEEL_MID_VALUE - 50;
 const int FLYWHEEL_SPIN_TIME = 3000;
 const int CALIBRATION_DELAY_TIME = 3000;
 
@@ -55,17 +55,17 @@ void calibrateFlywheels() {
   upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
   lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
   delay(CALIBRATION_DELAY_TIME);
-  upperFlywheel.writeMicroseconds(FLYWHEEL_MID_VALUE);
-  lowerFlywheel.writeMicroseconds(FLYWHEEL_MID_VALUE);
-  delay(CALIBRATION_DELAY_TIME);
-  upperFlywheel.writeMicroseconds(FLYWHEEL_STOP_VALUE);
-  lowerFlywheel.writeMicroseconds(FLYWHEEL_STOP_VALUE);
+//  upperFlywheel.writeMicroseconds(FLYWHEEL_MID_VALUE);
+//  lowerFlywheel.writeMicroseconds(FLYWHEEL_MID_VALUE);
+//  delay(CALIBRATION_DELAY_TIME);
+//  upperFlywheel.writeMicroseconds(FLYWHEEL_STOP_VALUE);
+//  lowerFlywheel.writeMicroseconds(FLYWHEEL_STOP_VALUE);
   Serial.print("Calibration compeleted\n");
 }
 
 // Read from potentiometer.
 void setFlywheelSpeed() {
-  flywheelMaxSpeed = map(analogRead(FLYWHEEL_SPEED_PIN), 0, 1023, FLYWHEEL_MID_VALUE, FLYWHEEL_MAX_VALUE);
+  flywheelMaxSpeed = map(analogRead(FLYWHEEL_SPEED_PIN), 0, 1023, FLYWHEEL_MIN_VALUE + 50, FLYWHEEL_MAX_VALUE);
 }
 
 // Read from potentiometer.
@@ -104,8 +104,8 @@ void updateFlywheels() {
   }
   // If we are out of time stop the flywheels.
   if (flywheelsTimeRemaining <= 0 && flywheelsSpinning == true) {
-    upperFlywheel.writeMicroseconds(FLYWHEEL_STOP_VALUE);
-    lowerFlywheel.writeMicroseconds(FLYWHEEL_STOP_VALUE);
+    upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+    lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
     flywheelsSpinning = false;
     Serial.print("Flywheels stopped.\n");
     return;
