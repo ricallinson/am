@@ -143,7 +143,7 @@ void updatePusher() {
 }
 
 void pushDart() {
-  pusher.step(STEPS_PER_ROTATION); // 200 steps per rotation
+  pusher.step(STEPS_PER_ROTATION); // 200 steps per rotation.
   delay(100); // Stepper motor rotation time.
   totalDartsFired++;
   Serial.print("Dart fired\n");
