@@ -66,7 +66,7 @@ void calibrateFlywheels() {
 
 // Read from potentiometer.
 void setFlywheelSpeed() {
-  flywheelMaxSpeed = map(analogRead(FLYWHEEL_SPEED_PIN), 0, 1023, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
+  flywheelMaxSpeed = map(analogRead(FLYWHEEL_SPEED_PIN), 100, 900, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
 }
 
 // Read from potentiometer.
@@ -157,17 +157,17 @@ void log() {
   Serial.print("--------------\n");
   Serial.print("Firing Request\n");
   Serial.print("--------------\n");
-  Serial.print("Darts per second: ");
-  Serial.print(pusherDps);
-  Serial.print("\n");
   Serial.print("Flywheel speed: ");
-  Serial.print(flywheelMaxSpeed);
+  Serial.print(flywheelMaxSpeed - FLYWHEEL_MIN_VALUE);
   Serial.print("\n");
   Serial.print("Upper flywheel bias: ");
   Serial.print(flywheelUpperBias);
   Serial.print("\n");
   Serial.print("Lower flywheel bias: ");
   Serial.print(flywheelLowerBias);
+  Serial.print("\n");
+  Serial.print("Darts per second: ");
+  Serial.print(pusherDps);
   Serial.print("\n");
   Serial.print("Dart burst count: ");
   Serial.print(dartsRemainingToPush);
