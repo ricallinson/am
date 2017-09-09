@@ -1,21 +1,22 @@
 #include <Servo.h>
 #include <Stepper.h>
- 
-Servo upperFlywheel;
-Servo lowerFlywheel;
-Stepper pusher(200, 4, 5, 6, 7);
 
 // Arduino constant pins.
 #define FLYWHEEL_SPEED_PIN 0 // Analog 0
 #define FLYWHEEL_BIAS_PIN 1  // Analog 1
 #define PUSHER_DPS_PIN 2     // Analog 2
 #define PUSHER_BURST_PIN 3   // Analog 3
+#define STEPPER_PIN_1 4      // Digital 4
+#define STEPPER_PIN_2 5      // Digital 5
+#define STEPPER_PIN_3 6      // Digital 6
+#define STEPPER_PIN_4 7      // Digital 7
 #define TRIGGER_PIN 8        // Digital 8
 #define LOWER_FLYWHEEL 9     // Digital 9
 #define UPPER_FLYWHEEL 10    // Digital 10
 
 // Internal constants.
-#define ONE_SECOND 1000;
+#define STEPS_PER_ROTATION 200
+#define ONE_SECOND 1000
 #define FLYWHEEL_MIN_VALUE 1060
 #define FLYWHEEL_MAX_VALUE 1860
 #define FLYWHEEL_SPIN_TIME 3000
@@ -36,6 +37,11 @@ int totalDartsFired;
 
 // Internal state.
 bool flywheelsSpinning;
+
+// Objects.
+Servo upperFlywheel;
+Servo lowerFlywheel;
+Stepper pusher(STEPS_PER_ROTATION, STEPPER_PIN_1, STEPPER_PIN_2, STEPPER_PIN_3, STEPPER_PIN_4);
 
 void setup() {
   // Assign pins.
@@ -137,7 +143,7 @@ void updatePusher() {
 }
 
 void pushDart() {
-  pusher.step(200); // 200 steps per rotation
+  pusher.step(STEPS_PER_ROTATION); // 200 steps per rotation
   delay(100); // Stepper motor rotation time.
   totalDartsFired++;
   Serial.print("Dart fired\n");
