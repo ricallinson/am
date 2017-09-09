@@ -177,13 +177,13 @@ void loop() {
     setFlywheelBias();
     setDartsPerSecond();
     setDartsToPush();
-    infoStatus();
+    infoFiringRequest();
   }
   updateFlywheels();
   updatePusher();
 }
 
-void infoStatus() {
+void infoFiringRequest() {
   info("--------------\n");
   info("Firing Request\n");
   info("--------------\n");
