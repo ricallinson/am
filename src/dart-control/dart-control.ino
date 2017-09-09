@@ -6,22 +6,22 @@ Servo lowerFlywheel;
 Stepper pusher(200, 4, 5, 6, 7);
 
 // Arduino constant pins.
-const int FLYWHEEL_SPEED_PIN = 0; // Analog 0
-const int FLYWHEEL_BIAS_PIN = 1;  // Analog 1
-const int PUSHER_DPS_PIN = 2;     // Analog 2
-const int PUSHER_BURST_PIN = 3;   // Analog 3
-const int TRIGGER_PIN = 8;        // Digital 8
-const int LOWER_FLYWHEEL = 9;     // Digital 9
-const int UPPER_FLYWHEEL = 10;    // Digital 10
+#define FLYWHEEL_SPEED_PIN 0 // Analog 0
+#define FLYWHEEL_BIAS_PIN 1  // Analog 1
+#define PUSHER_DPS_PIN 2     // Analog 2
+#define PUSHER_BURST_PIN 3   // Analog 3
+#define TRIGGER_PIN 8        // Digital 8
+#define LOWER_FLYWHEEL 9     // Digital 9
+#define UPPER_FLYWHEEL 10    // Digital 10
 
 // Internal constants.
-const int ONE_SECOND = 1000;
-const int FLYWHEEL_MIN_VALUE = 1060;
-const int FLYWHEEL_MAX_VALUE = 1860;
+#define ONE_SECOND 1000;
+#define FLYWHEEL_MIN_VALUE 1060
+#define FLYWHEEL_MAX_VALUE 1860
+#define FLYWHEEL_SPIN_TIME 3000
+#define CALIBRATION_DELAY_TIME 3000
 //const int FLYWHEEL_MID_VALUE = FLYWHEEL_MIN_VALUE + ((FLYWHEEL_MAX_VALUE - FLYWHEEL_MIN_VALUE) / 2); // ~1440;
 //const int FLYWHEEL_STOP_VALUE = FLYWHEEL_MID_VALUE - 50;
-const int FLYWHEEL_SPIN_TIME = 3000;
-const int CALIBRATION_DELAY_TIME = 3000;
 
 // External input values.
 int flywheelMaxSpeed;
@@ -138,7 +138,7 @@ void updatePusher() {
 
 void pushDart() {
   pusher.step(200); // 200 steps per rotation
-  delay(100); // Fake dart firing.
+  delay(100); // Stepper motor rotation time.
   totalDartsFired++;
   Serial.print("Dart fired\n");
 }
