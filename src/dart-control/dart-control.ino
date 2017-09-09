@@ -6,10 +6,10 @@
 #define FLYWHEEL_BIAS_PIN  A1  // Analog 1
 #define PUSHER_DPS_PIN     A2  // Analog 2
 #define PUSHER_BURST_PIN   A3  // Analog 3
-#define STEPPER_PIN_1      4   // Digital 4
-#define STEPPER_PIN_2      5   // Digital 5
-#define STEPPER_PIN_3      6   // Digital 6
-#define STEPPER_PIN_4      7   // Digital 7
+#define STEPPER_PIN_A1     4   // Digital 4
+#define STEPPER_PIN_A2     5   // Digital 5
+#define STEPPER_PIN_B1     6   // Digital 6
+#define STEPPER_PIN_B2     7   // Digital 7
 #define TRIGGER_PIN        8   // Digital 8
 #define LOWER_FLYWHEEL     9   // Digital 9
 #define UPPER_FLYWHEEL     10  // Digital 10
@@ -39,7 +39,7 @@ bool flywheelsSpinning;
 // Objects.
 Servo upperFlywheel;
 Servo lowerFlywheel;
-Stepper pusher(STEPS_PER_ROTATION, STEPPER_PIN_1, STEPPER_PIN_2, STEPPER_PIN_3, STEPPER_PIN_4);
+Stepper pusher(STEPS_PER_ROTATION, STEPPER_PIN_A1, STEPPER_PIN_A2, STEPPER_PIN_B1, STEPPER_PIN_B2);
 
 void info(const char str[]) {
   if (Serial) {
@@ -55,6 +55,10 @@ void info(int i) {
 
 void setup() {
   // Assign pins.
+  pinMode(STEPPER_PIN_A1, OUTPUT);
+  pinMode(STEPPER_PIN_A2, OUTPUT);
+  pinMode(STEPPER_PIN_B1, OUTPUT);
+  pinMode(STEPPER_PIN_B2, OUTPUT);
   pinMode(TRIGGER_PIN, INPUT);
   upperFlywheel.attach(UPPER_FLYWHEEL);
   lowerFlywheel.attach(LOWER_FLYWHEEL);
@@ -165,7 +169,7 @@ void updatePusher() {
 }
 
 void pushDart() {
-  pusher.step(STEPS_PER_ROTATION);
+  pusher.step(200);
   totalDartsFired++;
   info("Dart fired.\n");
 }
