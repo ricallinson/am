@@ -41,6 +41,18 @@ Servo upperFlywheel;
 Servo lowerFlywheel;
 Stepper pusher(STEPS_PER_ROTATION, STEPPER_PIN_1, STEPPER_PIN_2, STEPPER_PIN_3, STEPPER_PIN_4);
 
+void info(const char str[]) {
+  if (Serial) {
+    Serial.print(str);
+  }
+}
+
+void info(int i) {
+  if (Serial) {
+    Serial.print(i);
+  }
+}
+
 void setup() {
   // Assign pins.
   pinMode(TRIGGER_PIN, INPUT);
@@ -49,24 +61,36 @@ void setup() {
   // Start the system.
   Serial.begin(9600);
   calibrateFlywheels();
+  armFlywheels();
+  info("AM-1 is hot, have fun.\n");
+}
+
+void armFlywheels() {
+  info("Arming flywheels.\n");
+  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE - 100);
+  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE - 100);
+  delay(CALIBRATION_DELAY_TIME);
+  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+  info("Arming flywheels compeleted.\n");
 }
 
 // Used by the Afro ESC 12A Speed Controller.
 // This does not work if the Arduino is powered via USB.
 void calibrateFlywheels() {
-  Serial.print("Calibration started\n");
+  info("Calibration of flywheels started.\n");
   upperFlywheel.writeMicroseconds(FLYWHEEL_MAX_VALUE);
   lowerFlywheel.writeMicroseconds(FLYWHEEL_MAX_VALUE);
   delay(CALIBRATION_DELAY_TIME);
   upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
   lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
   delay(CALIBRATION_DELAY_TIME);
-  Serial.print("Calibration compeleted\n");
+  info("Calibration of flywheels compeleted.\n");
 }
 
 // Read from potentiometer.
 void setFlywheelSpeed() {
-  flywheelMaxSpeed = map(analogRead(FLYWHEEL_SPEED_PIN), 100, 900, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
+  flywheelMaxSpeed = map(analogRead(FLYWHEEL_SPEED_PIN), 0, 1023, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
 }
 
 // Read from potentiometer.
@@ -78,7 +102,7 @@ void setFlywheelBias() {
 
 // Read from potentiometer.
 void setDartsPerSecond() {
-  pusherDps = map(analogRead(PUSHER_DPS_PIN), 100, 900, 1, 10);
+  pusherDps = map(analogRead(PUSHER_DPS_PIN), 20, 1000, 1, 10);
   pusher.setSpeed(60 * pusherDps); // Rotations per minute.
 }
 
@@ -88,7 +112,7 @@ void setDartsToPush() {
   // 2 = Double tap.
   // 3 = Three round burst.
   // 4 = Full Auto.
-  dartsRemainingToPush = map(analogRead(PUSHER_BURST_PIN), 100, 900, 1, 4);
+  dartsRemainingToPush = map(analogRead(PUSHER_BURST_PIN), 20, 1000, 1, 4);
 }
 
 // Read from momentary switch.
@@ -99,13 +123,15 @@ bool getTriggerState() {
 void updateFlywheels() {
   // Start the flywheels.
   if (flywheelsTimeRemaining > 0 && flywheelsSpinning == false) {
+    // Ramp up speed if more than 50%.
+    // ...
     // Set the final speed.
     upperFlywheel.writeMicroseconds(flywheelMaxSpeed + flywheelUpperBias);
     lowerFlywheel.writeMicroseconds(flywheelMaxSpeed + flywheelLowerBias);
     flywheelsSpinning = true;
-    Serial.print("Flywheels started.\n");
+    info("Flywheels started.\n");
   }
-  // Reduce flywheel time.
+  // Reduce remaining flywheel time.
   if (flywheelsSpinning == true) {
     flywheelsTimeRemaining--;
     delay(1);
@@ -115,7 +141,7 @@ void updateFlywheels() {
     upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
     lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
     flywheelsSpinning = false;
-    Serial.print("Flywheels stopped.\n");
+    info("Flywheels stopped.\n");
   }
 }
 
@@ -124,20 +150,24 @@ void updatePusher() {
     return;
   }
   bool burst = dartsRemainingToPush < 4;
+  // If set to full auto change only fire one dart at a time.
+  if (dartsRemainingToPush == 4) {
+    dartsRemainingToPush = 1;
+  }
   for(dartsRemainingToPush; dartsRemainingToPush > 0; dartsRemainingToPush--) {
     pushDart();
   }
   // If this was a burst wait for the trigger to be released.
   while (burst && getTriggerState()) {
-    Serial.print("Nope...\n");
-    delay(100);
+    info("Waiting for the trigger to be released...\n");
+    delay(200);
   }
 }
 
 void pushDart() {
   pusher.step(STEPS_PER_ROTATION);
   totalDartsFired++;
-  Serial.print("Dart fired\n");
+  info("Dart fired.\n");
 }
 
 void loop() {
@@ -147,33 +177,33 @@ void loop() {
     setFlywheelBias();
     setDartsPerSecond();
     setDartsToPush();
-    log();
+    infoStatus();
   }
   updateFlywheels();
   updatePusher();
 }
 
-void log() {
-  Serial.print("--------------\n");
-  Serial.print("Firing Request\n");
-  Serial.print("--------------\n");
-  Serial.print("Flywheel speed: ");
-  Serial.print(flywheelMaxSpeed - FLYWHEEL_MIN_VALUE);
-  Serial.print("\n");
-  Serial.print("Upper flywheel bias: ");
-  Serial.print(flywheelUpperBias);
-  Serial.print("\n");
-  Serial.print("Lower flywheel bias: ");
-  Serial.print(flywheelLowerBias);
-  Serial.print("\n");
-  Serial.print("Darts per second: ");
-  Serial.print(pusherDps);
-  Serial.print("\n");
-  Serial.print("Dart burst count: ");
-  Serial.print(dartsRemainingToPush);
-  Serial.print("\n");
-  Serial.print("Total darts fired: ");
-  Serial.print(totalDartsFired);
-  Serial.print("\n");
+void infoStatus() {
+  info("--------------\n");
+  info("Firing Request\n");
+  info("--------------\n");
+  info("Flywheel speed: ");
+  info(flywheelMaxSpeed - FLYWHEEL_MIN_VALUE);
+  info("\n");
+  info("Upper flywheel bias: ");
+  info(flywheelUpperBias);
+  info("\n");
+  info("Lower flywheel bias: ");
+  info(flywheelLowerBias);
+  info("\n");
+  info("Darts per second: ");
+  info(pusherDps);
+  info("\n");
+  info("Dart burst count: ");
+  info(dartsRemainingToPush);
+  info("\n");
+  info("Total darts fired: ");
+  info(totalDartsFired);
+  info("\n");
 }
 
