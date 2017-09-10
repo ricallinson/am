@@ -1,5 +1,11 @@
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include <Servo.h>
 #include <Stepper.h>
+
+Adafruit_SSD1306 display(4);
 
 // Arduino constant pins.
 #define FLYWHEEL_SPEED_PIN A0  // Analog 0
@@ -13,7 +19,8 @@
 #define TRIGGER_PIN        8   // Digital 8
 #define LOWER_FLYWHEEL     9   // Digital 9
 #define UPPER_FLYWHEEL     10  // Digital 10
-#define PUSHER_HOME_MARKER 11  // Digital 11
+#define DISPLAY_PIN        11  // Digital 11
+#define PUSHER_HOME_MARKER 12  // Digital 12
 
 // Internal constants.
 #define STEPS_PER_ROTATION     200
@@ -28,13 +35,16 @@ int flywheelMaxSpeed;
 int flywheelUpperBias;
 int flywheelLowerBias;
 int pusherDps; // Darts per second
+int magSize;
+int remainingDarts;
 
 // Internal counting values.
 int flywheelsTimeRemaining;
-int dartsRemainingToPush;
+int dartsToPush;
 int totalDartsFired;
 
 // Internal state.
+int  displayId;
 bool flywheelsSpinning;
 
 // Objects.
@@ -65,10 +75,165 @@ void setup() {
   lowerFlywheel.attach(LOWER_FLYWHEEL);
   // Start the system.
   Serial.begin(9600);
+  startDisplay();
 //  homePusher();
-  calibrateFlywheels();
-  armFlywheels();
+//  calibrateFlywheels();
   info("AM-1 is hot, have fun.\n");
+}
+
+void startDisplay() {
+   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+   display.clearDisplay();
+   display.display();
+}
+
+void updateDisplay() {
+  if (digitalRead(DISPLAY_PIN) == HIGH) {
+    displayId++;
+    while (digitalRead(DISPLAY_PIN) == HIGH) {
+      delay(200);
+    }
+  }
+  if (displayId > 6) {
+    displayId = 0;
+  }
+  renderDisplay(displayId);
+}
+
+void renderDisplay(int id) {
+  display.clearDisplay();
+  switch (id) {
+    case 0:
+      // Show remaining darts.
+      renderRemainingDarts();
+      break;
+    case 1:
+      // Change Mag Size.
+      renderMagSize();
+      break;
+    case 2:
+      // Change Mode.
+      renderMode();
+      break;
+    case 3:
+      // Change DPS.
+      renderDps();
+      break;
+    case 4:
+      // Change FPS.
+      renderFps();
+      break;
+    case 5:
+      // Change Bias.
+      renderBias();
+      break;
+    case 6:
+      // Show Info.
+      renderInfo();
+      break;
+  }
+  display.display();
+}
+
+void renderRemainingDarts() {
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.println("REMAINING");
+  display.setTextSize(3);
+  display.setCursor(0, 10);
+  display.println(remainingDarts);
+}
+
+void renderMagSize() {
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.println("MAG SIZE");
+  display.setTextSize(3);
+  display.setCursor(0, 10);
+  display.println(magSize);
+}
+
+void renderFps() {
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.println("FPS");
+  display.setTextSize(3);
+  display.setCursor(0, 10);
+  display.println(flywheelMaxSpeed - FLYWHEEL_MIN_VALUE);
+}
+
+void renderDps() {
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.println("DPS");
+  display.setTextSize(3);
+  display.setCursor(0, 10);
+  display.println(pusherDps);
+}
+
+void renderBias() {
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.println("BIAS");
+  display.setTextSize(3);
+  display.setCursor(0,10);
+  display.println(flywheelUpperBias);
+  display.setCursor(65, 10);
+  display.println(flywheelLowerBias);
+}
+
+void renderMode() {
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.println("BURST MODE");
+  display.setTextSize(3);
+  display.setCursor(0, 10);
+  switch (dartsToPush) {
+    case 1:
+      display.println("Single");
+      break;
+    case 2:
+      display.println("Double");
+      break;
+    case 3:
+      display.println("Tripple");
+      break;
+    case 4:
+      display.println("Auto");
+      break;
+  }
+}
+
+void renderInfo() {
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  // Top.
+  display.setCursor(0, 0);
+  display.print("INFO");
+  // Left side.
+  display.setCursor(0, 8);
+  display.print("SPEED: ");
+  display.println(flywheelMaxSpeed - FLYWHEEL_MIN_VALUE);
+  display.print("BURST: ");
+  display.println(dartsToPush);
+  display.print("FIRED: ");
+  display.println(totalDartsFired);
+  // Right Side.
+  display.setCursor(80, 8);
+  display.print("DPS:   ");
+  display.println(pusherDps);
+  display.setCursor(80,16);
+  display.print("UB: ");
+  display.println(flywheelUpperBias);
+  display.setCursor(80, 24);
+  display.print("LB: ");
+  display.println(flywheelLowerBias);
 }
 
 void homePusher() {
@@ -77,9 +242,9 @@ void homePusher() {
   byte marker = digitalRead(PUSHER_HOME_MARKER);
   while (marker == HIGH) {
     pusher.step(-1); // Step back and check it's location.
-    marker = digitalRead(homeButton);
+    marker = digitalRead(PUSHER_HOME_MARKER);
   }
-  pusher.setCurrentPosition(0);
+//  pusher.setCurrentPosition(0);
   info("Calibration of pusher compeleted.\n");
 }
 
@@ -96,16 +261,6 @@ void calibrateFlywheels() {
   info("Calibration of flywheels compeleted.\n");
 }
 
-void armFlywheels() {
-  info("Arming flywheels.\n");
-  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE - 100);
-  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE - 100);
-  delay(CALIBRATION_DELAY_TIME);
-  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
-  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
-  info("Arming flywheels compeleted.\n");
-}
-
 // Read from potentiometer.
 void setFlywheelSpeed() {
   flywheelMaxSpeed = map(analogRead(FLYWHEEL_SPEED_PIN), 0, 1023, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
@@ -120,7 +275,7 @@ void setFlywheelBias() {
 
 // Read from potentiometer.
 void setDartsPerSecond() {
-  pusherDps = map(analogRead(PUSHER_DPS_PIN), 20, 1000, 1, 10);
+  pusherDps = map(analogRead(PUSHER_DPS_PIN), 20, 1000, 1, 4);
   pusher.setSpeed(60 * pusherDps); // Rotations per minute.
 }
 
@@ -130,7 +285,7 @@ void setDartsToPush() {
   // 2 = Double tap.
   // 3 = Three round burst.
   // 4 = Full Auto.
-  dartsRemainingToPush = map(analogRead(PUSHER_BURST_PIN), 20, 1000, 1, 4);
+  dartsToPush = map(analogRead(PUSHER_BURST_PIN), 20, 1000, 1, 4);
 }
 
 // Read from momentary switch.
@@ -138,16 +293,27 @@ bool getTriggerState() {
   return digitalRead(TRIGGER_PIN) == HIGH;
 }
 
+void startFlywheels() {
+  // Ramp up speed if more than 50%.
+  // ...
+  // Set the final speed.
+  upperFlywheel.writeMicroseconds(flywheelMaxSpeed + flywheelUpperBias);
+  lowerFlywheel.writeMicroseconds(flywheelMaxSpeed + flywheelLowerBias);
+  flywheelsSpinning = true;
+  info("Flywheels started.\n");
+}
+
+void stopFlywheels() {
+  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+  flywheelsSpinning = false;
+  info("Flywheels stopped.\n");
+}
+
 void updateFlywheels() {
   // Start the flywheels.
   if (flywheelsTimeRemaining > 0 && flywheelsSpinning == false) {
-    // Ramp up speed if more than 50%.
-    // ...
-    // Set the final speed.
-    upperFlywheel.writeMicroseconds(flywheelMaxSpeed + flywheelUpperBias);
-    lowerFlywheel.writeMicroseconds(flywheelMaxSpeed + flywheelLowerBias);
-    flywheelsSpinning = true;
-    info("Flywheels started.\n");
+    startFlywheels();
   }
   // Reduce remaining flywheel time.
   if (flywheelsSpinning == true) {
@@ -156,29 +322,31 @@ void updateFlywheels() {
   }
   // If we are out of time stop the flywheels.
   if (flywheelsTimeRemaining <= 0 && flywheelsSpinning == true) {
-    upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
-    lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
-    flywheelsSpinning = false;
-    info("Flywheels stopped.\n");
+    stopFlywheels();
   }
 }
 
 void updatePusher() {
-  if (dartsRemainingToPush <= 0) {
-    return;
+  if (dartsToPush == 4) {
+    autoPusher();
+  } else {
+    burstPusher(dartsToPush);
   }
-  bool burst = dartsRemainingToPush < 4;
-  // If set to full auto change only fire one dart at a time.
-  if (dartsRemainingToPush == 4) {
-    dartsRemainingToPush = 1;
-  }
-  for(dartsRemainingToPush; dartsRemainingToPush > 0; dartsRemainingToPush--) {
+}
+
+void burstPusher(int i) {
+  for(i; i > 0; i--) {
     pushDart();
   }
-  // If this was a burst wait for the trigger to be released.
-  while (burst && getTriggerState()) {
+  while (getTriggerState()) {
     info("Waiting for the trigger to be released...\n");
     delay(200);
+  }
+}
+
+void autoPusher() {
+  while (getTriggerState()) {
+    pushDart();
   }
 }
 
@@ -192,14 +360,16 @@ void pushDart() {
 void loop() {
   if(getTriggerState()) {
     flywheelsTimeRemaining = FLYWHEEL_SPIN_TIME;
-    setFlywheelSpeed();
-    setFlywheelBias();
-    setDartsPerSecond();
-    setDartsToPush();
+    updatePusher();
     infoFiringRequest();
+    displayId = 0;
   }
+  setFlywheelSpeed();
+  setFlywheelBias();
+  setDartsPerSecond();
+  setDartsToPush();
   updateFlywheels();
-  updatePusher();
+  updateDisplay();
 }
 
 void infoFiringRequest() {
@@ -219,7 +389,7 @@ void infoFiringRequest() {
   info(pusherDps);
   info("\n");
   info("Dart burst count: ");
-  info(dartsRemainingToPush);
+  info(dartsToPush);
   info("\n");
   info("Total darts fired: ");
   info(totalDartsFired);
