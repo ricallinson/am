@@ -13,6 +13,7 @@
 #define TRIGGER_PIN        8   // Digital 8
 #define LOWER_FLYWHEEL     9   // Digital 9
 #define UPPER_FLYWHEEL     10  // Digital 10
+#define PUSHER_HOME_MARKER 11  // Digital 11
 
 // Internal constants.
 #define STEPS_PER_ROTATION     200
@@ -64,19 +65,22 @@ void setup() {
   lowerFlywheel.attach(LOWER_FLYWHEEL);
   // Start the system.
   Serial.begin(9600);
+//  homePusher();
   calibrateFlywheels();
   armFlywheels();
   info("AM-1 is hot, have fun.\n");
 }
 
-void armFlywheels() {
-  info("Arming flywheels.\n");
-  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE - 100);
-  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE - 100);
-  delay(CALIBRATION_DELAY_TIME);
-  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
-  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
-  info("Arming flywheels compeleted.\n");
+void homePusher() {
+  info("Calibration of pusher.\n");
+  pusher.step(10); // Move the pusher forward incase it's aready at home.
+  byte marker = digitalRead(PUSHER_HOME_MARKER);
+  while (marker == HIGH) {
+    pusher.step(-1); // Step back and check it's location.
+    marker = digitalRead(homeButton);
+  }
+  pusher.setCurrentPosition(0);
+  info("Calibration of pusher compeleted.\n");
 }
 
 // Used by the Afro ESC 12A Speed Controller.
@@ -90,6 +94,16 @@ void calibrateFlywheels() {
   lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
   delay(CALIBRATION_DELAY_TIME);
   info("Calibration of flywheels compeleted.\n");
+}
+
+void armFlywheels() {
+  info("Arming flywheels.\n");
+  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE - 100);
+  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE - 100);
+  delay(CALIBRATION_DELAY_TIME);
+  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+  info("Arming flywheels compeleted.\n");
 }
 
 // Read from potentiometer.
@@ -169,7 +183,8 @@ void updatePusher() {
 }
 
 void pushDart() {
-  pusher.step(200);
+  pusher.step(90);
+  pusher.step(-90);
   totalDartsFired++;
   info("Dart fired.\n");
 }
