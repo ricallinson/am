@@ -8,10 +8,7 @@
 Adafruit_SSD1306 display(4);
 
 // Arduino constant pins.
-#define FLYWHEEL_SPEED_PIN A0  // Analog 0
-#define FLYWHEEL_BIAS_PIN  A1  // Analog 1
-#define PUSHER_DPS_PIN     A2  // Analog 2
-#define PUSHER_BURST_PIN   A3  // Analog 3
+#define DATA_PIN           A0  // Analog 0
 #define STEPPER_PIN_A1     4   // Digital 4
 #define STEPPER_PIN_A2     5   // Digital 5
 #define STEPPER_PIN_B1     6   // Digital 6
@@ -31,20 +28,21 @@ Adafruit_SSD1306 display(4);
 #define CALIBRATION_DELAY_TIME 3000
 
 // External input values.
-int flywheelMaxSpeed;
-int flywheelUpperBias;
-int flywheelLowerBias;
-int pusherDps; // Darts per second
-int magSize;
-int remainingDarts;
+int flywheelMaxSpeed = FLYWHEEL_MIN_VALUE;
+int flywheelUpperBias = 0;
+int flywheelLowerBias = 0;
+int pusherDps = 1; // Darts per second
+int magSize = 6;
 
 // Internal counting values.
 int flywheelsTimeRemaining;
-int dartsToPush;
+int dartsToPush = 1;
 int totalDartsFired;
+int remainingDarts;
 
 // Internal state.
 int  displayId;
+bool resetInputValue;
 bool flywheelsSpinning;
 
 // Objects.
@@ -90,12 +88,13 @@ void startDisplay() {
 void updateDisplay() {
   if (digitalRead(DISPLAY_PIN) == HIGH) {
     displayId++;
+    if (displayId > 6) {
+      displayId = 0;
+    }
+    resetInputValue = true;
     while (digitalRead(DISPLAY_PIN) == HIGH) {
       delay(200);
     }
-  }
-  if (displayId > 6) {
-    displayId = 0;
   }
   renderDisplay(displayId);
 }
@@ -262,30 +261,42 @@ void calibrateFlywheels() {
 }
 
 // Read from potentiometer.
-void setFlywheelSpeed() {
-  flywheelMaxSpeed = map(analogRead(FLYWHEEL_SPEED_PIN), 0, 1023, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
-}
-
-// Read from potentiometer.
-void setFlywheelBias() {
-  int bias = map(analogRead(FLYWHEEL_BIAS_PIN), 0, 1023, -50, 50);
-  flywheelUpperBias = bias;
-  flywheelLowerBias = bias * -1;
-}
-
-// Read from potentiometer.
-void setDartsPerSecond() {
-  pusherDps = map(analogRead(PUSHER_DPS_PIN), 20, 1000, 1, 4);
-  pusher.setSpeed(60 * pusherDps); // Rotations per minute.
-}
-
-// Read from potentiometer.
-void setDartsToPush() {
-  // 1 = Single round.
-  // 2 = Double tap.
-  // 3 = Three round burst.
-  // 4 = Full Auto.
-  dartsToPush = map(analogRead(PUSHER_BURST_PIN), 20, 1000, 1, 4);
+void getInputValue(int id) {
+  int value = analogRead(DATA_PIN);
+  if (resetInputValue && value > 0) {
+    return;
+  }
+  resetInputValue = false;
+  switch (id) {
+    case 1:
+      // Change Mag Size.
+      magSize = map(value, 0, 1023, 1, 35);
+      info(magSize);
+      info("\n");
+      break;
+    case 2:
+      // Change Mode.
+      // 1 = Single round.
+      // 2 = Double tap.
+      // 3 = Three round burst.
+      // 4 = Full Auto.
+      dartsToPush = map(value, 0, 1023, 1, 4);
+      break;
+    case 3:
+      // Change DPS.
+      pusherDps = map(value, 0, 1023, 1, 4);
+      break;
+    case 4:
+      // Change FPS.
+      flywheelMaxSpeed = map(value, 0, 1023, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
+      break;
+    case 5:
+      // Change Bias.
+      int bias = map(value, 0, 1023, -50, 50);
+      flywheelUpperBias = bias;
+      flywheelLowerBias = bias * -1;
+      break;
+  }
 }
 
 // Read from momentary switch.
@@ -327,6 +338,7 @@ void updateFlywheels() {
 }
 
 void updatePusher() {
+  pusher.setSpeed(60 * pusherDps); // Rotations per minute.
   if (dartsToPush == 4) {
     autoPusher();
   } else {
@@ -364,12 +376,9 @@ void loop() {
     infoFiringRequest();
     displayId = 0;
   }
-  setFlywheelSpeed();
-  setFlywheelBias();
-  setDartsPerSecond();
-  setDartsToPush();
-  updateFlywheels();
+  getInputValue(displayId);
   updateDisplay();
+  updateFlywheels();
 }
 
 void infoFiringRequest() {
