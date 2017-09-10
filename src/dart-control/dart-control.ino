@@ -28,7 +28,7 @@ Adafruit_SSD1306 display(4);
 #define CALIBRATION_DELAY_TIME 3000
 
 // External input values.
-int flywheelMaxSpeed = FLYWHEEL_MIN_VALUE;
+int flywheelFps = FLYWHEEL_MIN_VALUE + 200;
 int flywheelUpperBias = 0;
 int flywheelLowerBias = 0;
 int pusherDps = 1; // Darts per second
@@ -161,7 +161,7 @@ void renderFps() {
   display.println("FPS");
   display.setTextSize(3);
   display.setCursor(0, 10);
-  display.println(flywheelMaxSpeed - FLYWHEEL_MIN_VALUE);
+  display.println(flywheelFps - FLYWHEEL_MIN_VALUE);
 }
 
 void renderDps() {
@@ -217,21 +217,21 @@ void renderInfo() {
   display.print("INFO");
   // Left side.
   display.setCursor(0, 8);
-  display.print("SPEED: ");
-  display.println(flywheelMaxSpeed - FLYWHEEL_MIN_VALUE);
+  display.print("FPS:   ");
+  display.println(flywheelFps - FLYWHEEL_MIN_VALUE);
   display.print("BURST: ");
   display.println(dartsToPush);
   display.print("FIRED: ");
   display.println(totalDartsFired);
   // Right Side.
   display.setCursor(80, 8);
-  display.print("DPS:   ");
+  display.print("DPS: ");
   display.println(pusherDps);
   display.setCursor(80,16);
-  display.print("UB: ");
+  display.print("UB:  ");
   display.println(flywheelUpperBias);
   display.setCursor(80, 24);
-  display.print("LB: ");
+  display.print("LB:  ");
   display.println(flywheelLowerBias);
 }
 
@@ -271,8 +271,7 @@ void getInputValue(int id) {
     case 1:
       // Change Mag Size.
       magSize = map(value, 0, 1023, 1, 35);
-      info(magSize);
-      info("\n");
+      reload();
       break;
     case 2:
       // Change Mode.
@@ -280,7 +279,7 @@ void getInputValue(int id) {
       // 2 = Double tap.
       // 3 = Three round burst.
       // 4 = Full Auto.
-      dartsToPush = map(value, 0, 1023, 1, 4);
+      dartsToPush = map(value, 0, 1000, 1, 4);
       break;
     case 3:
       // Change DPS.
@@ -288,7 +287,7 @@ void getInputValue(int id) {
       break;
     case 4:
       // Change FPS.
-      flywheelMaxSpeed = map(value, 0, 1023, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
+      flywheelFps = map(value, 0, 1023, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
       break;
     case 5:
       // Change Bias.
@@ -297,6 +296,10 @@ void getInputValue(int id) {
       flywheelLowerBias = bias * -1;
       break;
   }
+}
+
+void reload() {
+  remainingDarts = magSize;
 }
 
 // Read from momentary switch.
@@ -308,8 +311,8 @@ void startFlywheels() {
   // Ramp up speed if more than 50%.
   // ...
   // Set the final speed.
-  upperFlywheel.writeMicroseconds(flywheelMaxSpeed + flywheelUpperBias);
-  lowerFlywheel.writeMicroseconds(flywheelMaxSpeed + flywheelLowerBias);
+  upperFlywheel.writeMicroseconds(flywheelFps + flywheelUpperBias);
+  lowerFlywheel.writeMicroseconds(flywheelFps + flywheelLowerBias);
   flywheelsSpinning = true;
   info("Flywheels started.\n");
 }
@@ -365,16 +368,17 @@ void autoPusher() {
 void pushDart() {
   pusher.step(90);
   pusher.step(-90);
+  remainingDarts--;
   totalDartsFired++;
   info("Dart fired.\n");
 }
 
 void loop() {
   if(getTriggerState()) {
+    displayId = 0;
     flywheelsTimeRemaining = FLYWHEEL_SPIN_TIME;
     updatePusher();
     infoFiringRequest();
-    displayId = 0;
   }
   getInputValue(displayId);
   updateDisplay();
@@ -385,8 +389,8 @@ void infoFiringRequest() {
   info("--------------\n");
   info("Firing Request\n");
   info("--------------\n");
-  info("Flywheel speed: ");
-  info(flywheelMaxSpeed - FLYWHEEL_MIN_VALUE);
+  info("Flywheel feet per second: ");
+  info(flywheelFps - FLYWHEEL_MIN_VALUE);
   info("\n");
   info("Upper flywheel bias: ");
   info(flywheelUpperBias);
