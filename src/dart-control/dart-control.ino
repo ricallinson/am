@@ -279,7 +279,7 @@ void getInputValue(int id) {
       // 2 = Double tap.
       // 3 = Three round burst.
       // 4 = Full Auto.
-      dartsToPush = map(value, 0, 1000, 1, 4);
+      dartsToPush = map(value, 10, 900, 1, 4);
       break;
     case 3:
       // Change DPS.
@@ -366,8 +366,8 @@ void autoPusher() {
 }
 
 void pushDart() {
-  pusher.step(90);
-  pusher.step(-90);
+  pusher.step(60);
+  pusher.step(-60);
   remainingDarts--;
   totalDartsFired++;
   info("Dart fired.\n");
