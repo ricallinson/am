@@ -9,10 +9,12 @@ Adafruit_SSD1306 display(4);
 
 // Arduino constant pins.
 #define DATA_PIN           A0  // Analog 0
-#define STEPPER_PIN_A1     4   // Digital 4
-#define STEPPER_PIN_A2     5   // Digital 5
-#define STEPPER_PIN_B1     6   // Digital 6
-#define STEPPER_PIN_B2     7   // Digital 7
+#define VDC_PIN            A1  // Analog 1
+#define STEPPER_PIN_A1     3   // Digital 3
+#define STEPPER_PIN_A2     4   // Digital 4
+#define STEPPER_PIN_B1     5   // Digital 5
+#define STEPPER_PIN_B2     6   // Digital 6
+#define RELOAD_PIN         7   // Digital 7
 #define TRIGGER_PIN        8   // Digital 8
 #define LOWER_FLYWHEEL     9   // Digital 9
 #define UPPER_FLYWHEEL     10  // Digital 10
@@ -26,6 +28,8 @@ Adafruit_SSD1306 display(4);
 #define FLYWHEEL_MAX_VALUE     1860
 #define FLYWHEEL_SPIN_TIME     3000
 #define CALIBRATION_DELAY_TIME 3000
+#define VDC_MIN 10.0
+#define VDC_MAX 12.0
 
 // External input values.
 int flywheelFps = FLYWHEEL_MIN_VALUE + 200;
@@ -44,6 +48,7 @@ int remainingDarts;
 int  displayId;
 bool resetInputValue;
 bool flywheelsSpinning;
+bool newMag;
 
 // Objects.
 Servo upperFlywheel;
@@ -86,13 +91,13 @@ void startDisplay() {
 }
 
 void updateDisplay() {
-  if (digitalRead(DISPLAY_PIN) == HIGH) {
+  if (digitalRead(DISPLAY_PIN) == LOW) {
     displayId++;
     if (displayId > 6) {
       displayId = 0;
     }
     resetInputValue = true;
-    while (digitalRead(DISPLAY_PIN) == HIGH) {
+    while (digitalRead(DISPLAY_PIN) == LOW) {
       delay(200);
     }
   }
@@ -131,6 +136,7 @@ void renderDisplay(int id) {
       renderInfo();
       break;
   }
+  renderBattery();
   display.display();
 }
 
@@ -209,6 +215,28 @@ void renderMode() {
   }
 }
 
+void renderBattery() {
+  display.setTextColor(WHITE);
+  display.setCursor(100, 0);
+  display.setTextSize(1);
+  display.print(map(getBatteryVoltage(), VDC_MIN, VDC_MAX, 0, 100));
+  display.setCursor(120, 0);
+  display.print("%");
+}
+
+void renderBatteryError() {
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  if (getBatteryVoltage() <= VDC_MIN) {
+    display.println("BAT LOW");
+  } else if (getBatteryVoltage() >= VDC_MAX) {
+    display.println("BAT ERR");
+  }
+  display.display();
+}
+
 void renderInfo() {
   display.setTextSize(1);
   display.setTextColor(WHITE);
@@ -237,13 +265,12 @@ void renderInfo() {
 
 void homePusher() {
   info("Calibration of pusher.\n");
-  pusher.step(10); // Move the pusher forward incase it's aready at home.
+  pusher.step(5); // Move the pusher forward incase it's aready at home.
   byte marker = digitalRead(PUSHER_HOME_MARKER);
   while (marker == HIGH) {
     pusher.step(-1); // Step back and check it's location.
     marker = digitalRead(PUSHER_HOME_MARKER);
   }
-//  pusher.setCurrentPosition(0);
   info("Calibration of pusher compeleted.\n");
 }
 
@@ -264,6 +291,8 @@ void calibrateFlywheels() {
 void getInputValue(int id) {
   int value = analogRead(DATA_PIN);
   if (resetInputValue && value > 0) {
+    info(value);
+    info("\n");
     return;
   }
   resetInputValue = false;
@@ -271,7 +300,7 @@ void getInputValue(int id) {
     case 1:
       // Change Mag Size.
       magSize = map(value, 0, 1023, 1, 35);
-      reload();
+      remainingDarts = magSize;
       break;
     case 2:
       // Change Mode.
@@ -298,13 +327,39 @@ void getInputValue(int id) {
   }
 }
 
-void reload() {
-  remainingDarts = magSize;
+float getBatteryVoltage() {
+  return VDC_MIN + 1;
+  unsigned char sampleCount;
+  int sum;
+  int NUM_SAMPLES = 10;
+  // take a number of analog samples and add them up
+  while (sampleCount < NUM_SAMPLES) {
+      sum += analogRead(VDC_PIN);
+      sampleCount++;
+      delay(10);
+  }
+  // Calculate the voltage
+  // Use 5.0 for a 5.0V ADC reference voltage
+  // 5.015V is the calibrated reference voltage
+  return ((float)sum / (float)NUM_SAMPLES * 5.015) / 1024.0;
+}
+
+void getLoadingState() {
+  if (newMag == true && digitalRead(RELOAD_PIN) == HIGH) {
+    remainingDarts = 0;
+    newMag = false;
+    info("Mag removed.\n");
+  }
+  if (newMag == false && digitalRead(RELOAD_PIN) == LOW) {
+    remainingDarts = magSize;
+    newMag = true;
+    info("Mag loaded.\n");
+  }
 }
 
 // Read from momentary switch.
 bool getTriggerState() {
-  return digitalRead(TRIGGER_PIN) == HIGH;
+  return digitalRead(TRIGGER_PIN) == LOW;
 }
 
 void startFlywheels() {
@@ -374,6 +429,14 @@ void pushDart() {
 }
 
 void loop() {
+  if (getBatteryVoltage() < VDC_MIN || getBatteryVoltage() > VDC_MAX) {
+    // Show change battery.
+    renderBatteryError();
+    info("Battery ~");
+    info(getBatteryVoltage());
+    info("\n");
+    return;
+  }
   if(getTriggerState()) {
     displayId = 0;
     flywheelsTimeRemaining = FLYWHEEL_SPIN_TIME;
@@ -383,6 +446,7 @@ void loop() {
   getInputValue(displayId);
   updateDisplay();
   updateFlywheels();
+  getLoadingState();
 }
 
 void infoFiringRequest() {
