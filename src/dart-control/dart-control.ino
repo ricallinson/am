@@ -90,20 +90,6 @@ void startDisplay() {
    display.display();
 }
 
-void updateDisplay() {
-  if (digitalRead(DISPLAY_PIN) == LOW) {
-    displayId++;
-    if (displayId > 6) {
-      displayId = 0;
-    }
-    resetInputValue = true;
-    while (digitalRead(DISPLAY_PIN) == LOW) {
-      delay(200);
-    }
-  }
-  renderDisplay(displayId);
-}
-
 void renderDisplay(int id) {
   display.clearDisplay();
   switch (id) {
@@ -219,7 +205,7 @@ void renderBattery() {
   display.setTextColor(WHITE);
   display.setCursor(100, 0);
   display.setTextSize(1);
-  display.print(map(getBatteryVoltage(), VDC_MIN, VDC_MAX, 0, 100));
+  display.print(map(readBatteryVoltage(), VDC_MIN, VDC_MAX, 0, 100));
   display.setCursor(120, 0);
   display.print("%");
 }
@@ -229,9 +215,9 @@ void renderBatteryError() {
   display.setTextColor(WHITE);
   display.setCursor(0, 0);
   display.setTextSize(1);
-  if (getBatteryVoltage() <= VDC_MIN) {
+  if (readBatteryVoltage() <= VDC_MIN) {
     display.println("BAT LOW");
-  } else if (getBatteryVoltage() >= VDC_MAX) {
+  } else if (readBatteryVoltage() >= VDC_MAX) {
     display.println("BAT ERR");
   }
   display.display();
@@ -287,8 +273,21 @@ void calibrateFlywheels() {
   info("Calibration of flywheels compeleted.\n");
 }
 
+void readDisplayId() {
+  if (digitalRead(DISPLAY_PIN) == LOW) {
+    displayId++;
+    if (displayId > 6) {
+      displayId = 0;
+    }
+    resetInputValue = true;
+    while (digitalRead(DISPLAY_PIN) == LOW) {
+      delay(200);
+    }
+  }
+}
+
 // Read from potentiometer.
-void getInputValue(int id) {
+void readInputValue(int id) {
   int value = analogRead(DATA_PIN);
   if (resetInputValue && value > 0) {
     info(value);
@@ -327,7 +326,7 @@ void getInputValue(int id) {
   }
 }
 
-float getBatteryVoltage() {
+float readBatteryVoltage() {
   return VDC_MIN + 1;
   unsigned char sampleCount;
   int sum;
@@ -344,7 +343,7 @@ float getBatteryVoltage() {
   return ((float)sum / (float)NUM_SAMPLES * 5.015) / 1024.0;
 }
 
-void getLoadingState() {
+void readLoadingState() {
   if (newMag == true && digitalRead(RELOAD_PIN) == HIGH) {
     remainingDarts = 0;
     newMag = false;
@@ -358,7 +357,7 @@ void getLoadingState() {
 }
 
 // Read from momentary switch.
-bool getTriggerState() {
+bool readTriggerState() {
   return digitalRead(TRIGGER_PIN) == LOW;
 }
 
@@ -408,14 +407,14 @@ void burstPusher(int i) {
   for(i; i > 0; i--) {
     pushDart();
   }
-  while (getTriggerState()) {
+  while (readTriggerState()) {
     info("Waiting for the trigger to be released...\n");
     delay(200);
   }
 }
 
 void autoPusher() {
-  while (getTriggerState()) {
+  while (readTriggerState()) {
     pushDart();
   }
 }
@@ -428,25 +427,42 @@ void pushDart() {
   info("Dart fired.\n");
 }
 
+bool isCharged() {
+  if (readBatteryVoltage() > VDC_MIN || readBatteryVoltage() < VDC_MAX) {
+    return true;
+  }
+  // Show change battery.
+  renderBatteryError();
+  info("Battery ~");
+  info(readBatteryVoltage());
+  info("\n");
+  return false;
+}
+
+bool isFiring() {
+  if(readTriggerState() == false) {
+    return false;
+  }
+  displayId = 0;
+  flywheelsTimeRemaining = FLYWHEEL_SPIN_TIME;
+  updatePusher();
+  infoFiringRequest();
+  return true;
+}
+
 void loop() {
-  if (getBatteryVoltage() < VDC_MIN || getBatteryVoltage() > VDC_MAX) {
-    // Show change battery.
-    renderBatteryError();
-    info("Battery ~");
-    info(getBatteryVoltage());
-    info("\n");
+  if (isCharged() == false) {
     return;
   }
-  if(getTriggerState()) {
-    displayId = 0;
-    flywheelsTimeRemaining = FLYWHEEL_SPIN_TIME;
-    updatePusher();
-    infoFiringRequest();
+  if (isFiring() == false) {
+    readLoadingState();
   }
-  getInputValue(displayId);
-  updateDisplay();
+  if (displayId > 0) {
+    readInputValue(displayId);
+  }
+  readDisplayId();
+  renderDisplay(displayId);
   updateFlywheels();
-  getLoadingState();
 }
 
 void infoFiringRequest() {
