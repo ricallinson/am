@@ -3,7 +3,6 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Servo.h>
-#include <Stepper.h>
 
 Adafruit_SSD1306 display(4);
 
@@ -23,7 +22,8 @@ Adafruit_SSD1306 display(4);
 
 // Internal constants.
 #define STEPS_PER_ROTATION     200
-#define ONE_SECOND             1000
+#define STEPS_PER_PUSH         15
+#define STEP_DELAY             2
 #define FLYWHEEL_MIN_VALUE     1060
 #define FLYWHEEL_MAX_VALUE     1860
 #define FLYWHEEL_SPIN_TIME     3000
@@ -33,7 +33,7 @@ Adafruit_SSD1306 display(4);
 #define VDC_SAMPLE_SIZE 10
 
 // External input values.
-int flywheelFps = FLYWHEEL_MIN_VALUE + 200;
+int flywheelFps = FLYWHEEL_MIN_VALUE + STEPS_PER_ROTATION;
 int flywheelUpperBias = 0;
 int flywheelLowerBias = 0;
 int pusherDps = 1; // Darts per second
@@ -41,7 +41,7 @@ int magSize = 6;
 
 // Internal counting values.
 int flywheelsTimeRemaining;
-int dartsToPush = 1;
+int dartsToPush = 4;
 int totalDartsFired;
 int remainingDarts;
 
@@ -56,7 +56,10 @@ int vdcReadingsIndex;
 // Objects.
 Servo upperFlywheel;
 Servo lowerFlywheel;
-Stepper pusher(STEPS_PER_ROTATION, STEPPER_PIN_A1, STEPPER_PIN_A2, STEPPER_PIN_B1, STEPPER_PIN_B2);
+
+//
+// Logging functions.
+//
 
 void info(const char str[]) {
   if (Serial) {
@@ -69,6 +72,49 @@ void info(int i) {
     Serial.print(i);
   }
 }
+
+//
+// Stepper functions.
+//
+
+void step1() {
+  digitalWrite(STEPPER_PIN_A1, HIGH);
+  digitalWrite(STEPPER_PIN_A2, LOW);
+  digitalWrite(STEPPER_PIN_B1, HIGH);
+  digitalWrite(STEPPER_PIN_B2, LOW);
+  delay(STEP_DELAY);
+}
+void step2() {
+  digitalWrite(STEPPER_PIN_A1, LOW);
+  digitalWrite(STEPPER_PIN_A2, HIGH);
+  digitalWrite(STEPPER_PIN_B1, HIGH);
+  digitalWrite(STEPPER_PIN_B2, LOW);
+  delay(STEP_DELAY);
+}
+void step3() {
+  digitalWrite(STEPPER_PIN_A1, LOW);
+  digitalWrite(STEPPER_PIN_A2, HIGH);
+  digitalWrite(STEPPER_PIN_B1, LOW);
+  digitalWrite(STEPPER_PIN_B2, HIGH);
+  delay(STEP_DELAY);
+}
+void step4() {
+  digitalWrite(STEPPER_PIN_A1, HIGH);
+  digitalWrite(STEPPER_PIN_A2, LOW);
+  digitalWrite(STEPPER_PIN_B1, LOW);
+  digitalWrite(STEPPER_PIN_B2, HIGH);
+  delay(STEP_DELAY);
+}
+void stopMotor() {
+  digitalWrite(STEPPER_PIN_A1, LOW);
+  digitalWrite(STEPPER_PIN_A2, LOW);
+  digitalWrite(STEPPER_PIN_B1, LOW);
+  digitalWrite(STEPPER_PIN_B2, LOW);
+}
+
+//
+// Operational functions.
+//
 
 void setup() {
   // Assign pins.
@@ -83,7 +129,7 @@ void setup() {
   Serial.begin(9600);
   startDisplay();
 //  homePusher();
-//  calibrateFlywheels();
+  calibrateFlywheels();
   info("AM-1 is hot, have fun.\n");
 }
 
@@ -255,10 +301,8 @@ void renderInfo() {
 
 void homePusher() {
   info("Calibration of pusher.\n");
-  pusher.step(5); // Move the pusher forward incase it's aready at home.
   byte marker = digitalRead(PUSHER_HOME_MARKER);
   while (marker == LOW) {
-    pusher.step(-1); // Step back and check it's location.
     marker = digitalRead(PUSHER_HOME_MARKER);
   }
   info("Calibration of pusher compeleted.\n");
@@ -294,8 +338,6 @@ void readDisplayIdInputValue() {
 void readPotInputValue(int id) {
   int value = analogRead(DATA_PIN);
   if (resetInputValue && value > 0) {
-    info(value);
-    info("\n");
     return;
   }
   resetInputValue = false;
@@ -405,8 +447,31 @@ void updateFlywheels() {
   }
 }
 
+void pusherExtend() {
+  int i = STEPS_PER_PUSH;
+  while (i > 0) {
+    step4();
+    step3();
+    step2();
+    step1();
+    i--;
+  }
+  stopMotor();
+}
+
+void pusherRetract() {
+  int i = STEPS_PER_PUSH;
+  while (i > 0) {
+    step1();
+    step2();
+    step3();
+    step4();
+    i--;
+  }
+  stopMotor();
+}
+
 void updatePusher() {
-  pusher.setSpeed(60 * pusherDps); // Rotations per minute.
   if (dartsToPush == 4) {
     autoPusher();
   } else {
@@ -431,8 +496,8 @@ void autoPusher() {
 }
 
 void pushDart() {
-  pusher.step(60);
-  pusher.step(-60);
+  pusherExtend();
+  pusherRetract();
   remainingDarts--;
   totalDartsFired++;
   info("Dart fired.\n");
