@@ -13,10 +13,10 @@ Adafruit_SSD1306 display(4);
 #define STEPPER_PIN_A2     4   // Digital 4
 #define STEPPER_PIN_B1     5   // Digital 5
 #define STEPPER_PIN_B2     6   // Digital 6
-#define RELOAD_PIN         7   // Digital 7
-#define TRIGGER_PIN        8   // Digital 8
-#define LOWER_FLYWHEEL     9   // Digital 9
-#define UPPER_FLYWHEEL     10  // Digital 10
+#define LOWER_FLYWHEEL     7   // Digital 7
+#define UPPER_FLYWHEEL     8   // Digital 8
+#define RELOAD_PIN         9   // Digital 9
+#define TRIGGER_PIN        10  // Digital 10
 #define DISPLAY_PIN        11  // Digital 11
 #define PUSHER_HOME_MARKER 12  // Digital 12
 
