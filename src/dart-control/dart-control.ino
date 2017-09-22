@@ -30,6 +30,7 @@ Adafruit_SSD1306 display(4);
 #define CALIBRATION_DELAY_TIME 3000
 #define VDC_MIN 10.0
 #define VDC_MAX 12.0
+#define VDC_SAMPLE_SIZE 10
 
 // External input values.
 int flywheelFps = FLYWHEEL_MIN_VALUE + 200;
@@ -49,6 +50,8 @@ int  displayId;
 bool resetInputValue;
 bool flywheelsSpinning;
 bool newMag;
+float vdcReadings[VDC_SAMPLE_SIZE];
+int vdcReadingsIndex;
 
 // Objects.
 Servo upperFlywheel;
@@ -90,7 +93,7 @@ void startDisplay() {
    display.display();
 }
 
-void renderDisplay(int id) {
+void updateDisplay(int id) {
   display.clearDisplay();
   switch (id) {
     case 0:
@@ -205,19 +208,20 @@ void renderBattery() {
   display.setTextColor(WHITE);
   display.setCursor(100, 0);
   display.setTextSize(1);
-  display.print(map(readBatteryVoltage(), VDC_MIN, VDC_MAX, 0, 100));
+  display.print(map(getBatteryVoltage(), VDC_MIN, VDC_MAX, 0, 100));
   display.setCursor(120, 0);
   display.print("%");
 }
 
 void renderBatteryError() {
+  float vdc = getBatteryVoltage();
   display.clearDisplay();
   display.setTextColor(WHITE);
   display.setCursor(0, 0);
   display.setTextSize(1);
-  if (readBatteryVoltage() <= VDC_MIN) {
+  if (vdc <= VDC_MIN) {
     display.println("BAT LOW");
-  } else if (readBatteryVoltage() >= VDC_MAX) {
+  } else if (vdc >= VDC_MAX) {
     display.println("BAT ERR");
   }
   display.display();
@@ -253,7 +257,7 @@ void homePusher() {
   info("Calibration of pusher.\n");
   pusher.step(5); // Move the pusher forward incase it's aready at home.
   byte marker = digitalRead(PUSHER_HOME_MARKER);
-  while (marker == HIGH) {
+  while (marker == LOW) {
     pusher.step(-1); // Step back and check it's location.
     marker = digitalRead(PUSHER_HOME_MARKER);
   }
@@ -273,21 +277,21 @@ void calibrateFlywheels() {
   info("Calibration of flywheels compeleted.\n");
 }
 
-void readDisplayId() {
-  if (digitalRead(DISPLAY_PIN) == LOW) {
+void readDisplayIdInputValue() {
+  if (digitalRead(DISPLAY_PIN) == HIGH) {
     displayId++;
     if (displayId > 6) {
       displayId = 0;
     }
     resetInputValue = true;
-    while (digitalRead(DISPLAY_PIN) == LOW) {
+    while (digitalRead(DISPLAY_PIN) == HIGH) {
       delay(200);
     }
   }
 }
 
 // Read from potentiometer.
-void readInputValue(int id) {
+void readPotInputValue(int id) {
   int value = analogRead(DATA_PIN);
   if (resetInputValue && value > 0) {
     info(value);
@@ -326,21 +330,28 @@ void readInputValue(int id) {
   }
 }
 
-float readBatteryVoltage() {
+float getBatteryVoltage() {
   return VDC_MIN + 1;
-  unsigned char sampleCount;
+
   int sum;
-  int NUM_SAMPLES = 10;
-  // take a number of analog samples and add them up
-  while (sampleCount < NUM_SAMPLES) {
-      sum += analogRead(VDC_PIN);
-      sampleCount++;
-      delay(10);
+  // take the VDC analog samples and add them up.
+  for (int i = 0; i < VDC_SAMPLE_SIZE; i++) {
+      sum += vdcReadings[i];
   }
   // Calculate the voltage
   // Use 5.0 for a 5.0V ADC reference voltage
   // 5.015V is the calibrated reference voltage
-  return ((float)sum / (float)NUM_SAMPLES * 5.015) / 1024.0;
+  return ((float)sum / (float)VDC_SAMPLE_SIZE * 5.015) / 1024.0;
+}
+
+void readBatteryVoltage() {
+  analogRead(VDC_PIN); // Read the PIN as we could get an old value.
+  delay(10); // Make sure the MUTEX has switched to our PIN.
+  vdcReadings[vdcReadingsIndex] = analogRead(VDC_PIN);
+  vdcReadingsIndex++;
+  if (vdcReadingsIndex >= VDC_SAMPLE_SIZE) {
+    vdcReadingsIndex = 0;
+  }
 }
 
 void readLoadingState() {
@@ -358,7 +369,7 @@ void readLoadingState() {
 
 // Read from momentary switch.
 bool readTriggerState() {
-  return digitalRead(TRIGGER_PIN) == LOW;
+  return digitalRead(TRIGGER_PIN) == HIGH;
 }
 
 void startFlywheels() {
@@ -428,13 +439,14 @@ void pushDart() {
 }
 
 bool isCharged() {
-  if (readBatteryVoltage() > VDC_MIN || readBatteryVoltage() < VDC_MAX) {
+  float vdc = getBatteryVoltage();
+  if (vdc > VDC_MIN || vdc < VDC_MAX) {
     return true;
   }
   // Show change battery.
   renderBatteryError();
   info("Battery ~");
-  info(readBatteryVoltage());
+  info(vdc);
   info("\n");
   return false;
 }
@@ -456,12 +468,13 @@ void loop() {
   }
   if (isFiring() == false) {
     readLoadingState();
+    readDisplayIdInputValue();
+    readBatteryVoltage();
   }
   if (displayId > 0) {
-    readInputValue(displayId);
+    readPotInputValue(displayId);
   }
-  readDisplayId();
-  renderDisplay(displayId);
+  updateDisplay(displayId);
   updateFlywheels();
 }
 
