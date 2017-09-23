@@ -26,10 +26,11 @@ Adafruit_SSD1306 display(4);
 #define STEP_DELAY             2
 #define FLYWHEEL_MIN_VALUE     1060
 #define FLYWHEEL_MAX_VALUE     1860
+#define FLYWHEEL_SPINUP_TIME   200
 #define FLYWHEEL_SPIN_TIME     3000
 #define CALIBRATION_DELAY_TIME 3000
 #define VDC_MIN 10.0
-#define VDC_MAX 12.0
+#define VDC_MAX 12.6
 #define VDC_SAMPLE_SIZE 10
 
 // External input values.
@@ -40,7 +41,6 @@ int pusherDps = 1; // Darts per second
 int magSize = 6;
 
 // Internal counting values.
-int flywheelsTimeRemaining;
 int dartsToPush = 4;
 int totalDartsFired;
 int remainingDarts;
@@ -48,10 +48,11 @@ int remainingDarts;
 // Internal state.
 int  displayId;
 bool resetInputValue;
-bool flywheelsSpinning;
 bool newMag;
 float vdcReadings[VDC_SAMPLE_SIZE];
 int vdcReadingsIndex;
+bool flywheelsSpinning;
+long flywheelsStartTime;
 
 // Objects.
 Servo upperFlywheel;
@@ -134,9 +135,13 @@ void setup() {
 }
 
 void startDisplay() {
-   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-   display.clearDisplay();
-   display.display();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.println("BOOTING...");
+  display.display();
+  info("Display started.\n");
 }
 
 void updateDisplay(int id) {
@@ -373,8 +378,6 @@ void readPotInputValue(int id) {
 }
 
 float getBatteryVoltage() {
-  return VDC_MIN + 1;
-
   int sum;
   // take the VDC analog samples and add them up.
   for (int i = 0; i < VDC_SAMPLE_SIZE; i++) {
@@ -420,6 +423,7 @@ void startFlywheels() {
   // Set the final speed.
   upperFlywheel.writeMicroseconds(flywheelFps + flywheelUpperBias);
   lowerFlywheel.writeMicroseconds(flywheelFps + flywheelLowerBias);
+  delay(FLYWHEEL_SPINUP_TIME);
   flywheelsSpinning = true;
   info("Flywheels started.\n");
 }
@@ -432,18 +436,14 @@ void stopFlywheels() {
 }
 
 void updateFlywheels() {
-  // Start the flywheels.
-  if (flywheelsTimeRemaining > 0 && flywheelsSpinning == false) {
-    startFlywheels();
-  }
-  // Reduce remaining flywheel time.
-  if (flywheelsSpinning == true) {
-    flywheelsTimeRemaining--;
-    delay(1);
-  }
-  // If we are out of time stop the flywheels.
-  if (flywheelsTimeRemaining <= 0 && flywheelsSpinning == true) {
+  long timeSpinning = millis() - flywheelsStartTime;
+  if (flywheelsSpinning == true && timeSpinning > FLYWHEEL_SPIN_TIME) {
     stopFlywheels();
+    flywheelsSpinning = false;
+  }
+  if (flywheelsSpinning == false && timeSpinning < FLYWHEEL_SPIN_TIME) {
+    startFlywheels();
+    flywheelsSpinning = true;
   }
 }
 
@@ -512,7 +512,7 @@ bool isCharged() {
   renderBatteryError();
   info("Battery ~");
   info(vdc);
-  info("\n");
+  info(" VDC\n");
   return false;
 }
 
@@ -521,7 +521,8 @@ bool isFiring() {
     return false;
   }
   displayId = 0;
-  flywheelsTimeRemaining = FLYWHEEL_SPIN_TIME;
+  flywheelsStartTime = millis();
+  updateFlywheels();
   updatePusher();
   infoFiringRequest();
   return true;
@@ -529,7 +530,8 @@ bool isFiring() {
 
 void loop() {
   if (isCharged() == false) {
-    return;
+    // If the battery low or high don't do anything.
+    //return;
   }
   if (isFiring() == false) {
     readLoadingState();
