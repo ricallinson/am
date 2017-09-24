@@ -7,8 +7,8 @@
 Adafruit_SSD1306 display(4);
 
 // Arduino constant pins.
-#define DATA_PIN           A0  // Analog 0
-#define VDC_PIN            A1  // Analog 1
+#define DATA_PIN           A2  // Analog 2
+#define VDC_PIN            A3  // Analog 3
 #define STEPPER_PIN_A1     3   // Digital 3
 #define STEPPER_PIN_A2     4   // Digital 4
 #define STEPPER_PIN_B1     5   // Digital 5
@@ -21,7 +21,6 @@ Adafruit_SSD1306 display(4);
 #define PUSHER_HOME_MARKER 12  // Digital 12
 
 // Internal constants.
-#define STEPS_PER_ROTATION     200
 #define STEPS_PER_PUSH         15
 #define STEP_DELAY             2
 #define FLYWHEEL_MIN_VALUE     1060
@@ -34,7 +33,7 @@ Adafruit_SSD1306 display(4);
 #define VDC_SAMPLE_SIZE 10
 
 // External input values.
-int flywheelFps = FLYWHEEL_MIN_VALUE + STEPS_PER_ROTATION;
+int flywheelFps = FLYWHEEL_MIN_VALUE + 200;
 int flywheelUpperBias = 0;
 int flywheelLowerBias = 0;
 int pusherDps = 1; // Darts per second
@@ -129,7 +128,7 @@ void setup() {
   // Start the system.
   Serial.begin(9600);
   startDisplay();
-//  homePusher();
+  homePusher();
   calibrateFlywheels();
   info("AM-1 is hot, have fun.\n");
 }
@@ -306,11 +305,14 @@ void renderInfo() {
 
 void homePusher() {
   info("Calibration of pusher.\n");
-  byte marker = digitalRead(PUSHER_HOME_MARKER);
-  while (marker == LOW) {
-    marker = digitalRead(PUSHER_HOME_MARKER);
+  pusherExtend(5);
+  byte homed = digitalRead(PUSHER_HOME_MARKER);
+  while (homed == LOW) {
+    pusherRetract(1);
+    homed = digitalRead(PUSHER_HOME_MARKER);
   }
   info("Calibration of pusher compeleted.\n");
+  display.println("Pusher.");
 }
 
 // Used by the Afro ESC 12A Speed Controller.
@@ -324,6 +326,7 @@ void calibrateFlywheels() {
   lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
   delay(CALIBRATION_DELAY_TIME);
   info("Calibration of flywheels compeleted.\n");
+  display.println("Flywheels.");
 }
 
 void readDisplayIdInputValue() {
@@ -447,26 +450,24 @@ void updateFlywheels() {
   }
 }
 
-void pusherExtend() {
-  int i = STEPS_PER_PUSH;
-  while (i > 0) {
+void pusherExtend(int steps) {
+  while (steps > 0) {
     step4();
     step3();
     step2();
     step1();
-    i--;
+    steps--;
   }
   stopMotor();
 }
 
-void pusherRetract() {
-  int i = STEPS_PER_PUSH;
-  while (i > 0) {
+void pusherRetract(int steps) {
+  while (steps > 0) {
     step1();
     step2();
     step3();
     step4();
-    i--;
+    steps--;
   }
   stopMotor();
 }
@@ -496,8 +497,8 @@ void autoPusher() {
 }
 
 void pushDart() {
-  pusherExtend();
-  pusherRetract();
+  pusherExtend(STEPS_PER_PUSH);
+  pusherRetract(STEPS_PER_PUSH);
   remainingDarts--;
   totalDartsFired++;
   info("Dart fired.\n");
