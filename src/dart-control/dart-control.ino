@@ -25,7 +25,7 @@ Adafruit_SSD1306 display(4);
 #define STEP_DELAY             2
 #define FLYWHEEL_MIN_VALUE     1060
 #define FLYWHEEL_MAX_VALUE     1860
-#define FLYWHEEL_SPINUP_TIME   200
+#define FLYWHEEL_SPINUP_TIME   250
 #define FLYWHEEL_SPIN_TIME     3000
 #define CALIBRATION_DELAY_TIME 3000
 #define VDC_MIN 10.0
@@ -128,7 +128,7 @@ void setup() {
   // Start the system.
   Serial.begin(9600);
   startDisplay();
-  homePusher();
+//  homePusher();
   calibrateFlywheels();
   info("AM-1 is hot, have fun.\n");
 }
@@ -312,7 +312,6 @@ void homePusher() {
     homed = digitalRead(PUSHER_HOME_MARKER);
   }
   info("Calibration of pusher compeleted.\n");
-  display.println("Pusher.");
 }
 
 // Used by the Afro ESC 12A Speed Controller.
@@ -326,7 +325,6 @@ void calibrateFlywheels() {
   lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
   delay(CALIBRATION_DELAY_TIME);
   info("Calibration of flywheels compeleted.\n");
-  display.println("Flywheels.");
 }
 
 void readDisplayIdInputValue() {
@@ -403,12 +401,12 @@ void readBatteryVoltage() {
 }
 
 void readLoadingState() {
-  if (newMag == true && digitalRead(RELOAD_PIN) == HIGH) {
+  if (newMag == true && digitalRead(RELOAD_PIN) == LOW) {
     remainingDarts = 0;
     newMag = false;
     info("Mag removed.\n");
   }
-  if (newMag == false && digitalRead(RELOAD_PIN) == LOW) {
+  if (newMag == false && digitalRead(RELOAD_PIN) == HIGH) {
     remainingDarts = magSize;
     newMag = true;
     info("Mag loaded.\n");
