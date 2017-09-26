@@ -21,7 +21,7 @@ Adafruit_SSD1306 display(4);
 #define PUSHER_HOME_MARKER 12  // Digital 12
 
 // Internal constants.
-#define STEPS_PER_PUSH         15
+#define STEPS_PER_PUSH         13
 #define STEP_DELAY             2
 #define FLYWHEEL_MIN_VALUE     1060
 #define FLYWHEEL_MAX_VALUE     1860
@@ -40,7 +40,7 @@ int pusherDps = 1; // Darts per second
 int magSize = 6;
 
 // Internal counting values.
-int dartsToPush = 4;
+int dartsToPush = 1;
 int totalDartsFired;
 int remainingDarts;
 
@@ -128,7 +128,7 @@ void setup() {
   // Start the system.
   Serial.begin(9600);
   startDisplay();
-//  homePusher();
+  homePusher();
   calibrateFlywheels();
   info("AM-1 is hot, have fun.\n");
 }
@@ -305,7 +305,11 @@ void renderInfo() {
 
 void homePusher() {
   info("Calibration of pusher.\n");
-  pusherExtend(5);
+  for (int i = 0 ; i < 30; i++) {
+    pusherExtend(STEPS_PER_PUSH);
+    pusherRetract(STEPS_PER_PUSH);
+  }
+  return;
   byte homed = digitalRead(PUSHER_HOME_MARKER);
   while (homed == LOW) {
     pusherRetract(1);
@@ -456,15 +460,14 @@ void pusherExtend(int steps) {
     step1();
     steps--;
   }
-  stopMotor();
 }
 
 void pusherRetract(int steps) {
   while (steps > 0) {
+    step4();
     step1();
     step2();
     step3();
-    step4();
     steps--;
   }
   stopMotor();
