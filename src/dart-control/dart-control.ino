@@ -18,7 +18,6 @@ Adafruit_SSD1306 display(4);
 #define RELOAD_PIN         9   // Digital 9
 #define TRIGGER_PIN        10  // Digital 10
 #define DISPLAY_PIN        11  // Digital 11
-#define PUSHER_HOME_MARKER 12  // Digital 12
 
 // Internal constants.
 #define STEPS_PER_PUSH         13
@@ -122,13 +121,14 @@ void setup() {
   pinMode(STEPPER_PIN_A2, OUTPUT);
   pinMode(STEPPER_PIN_B1, OUTPUT);
   pinMode(STEPPER_PIN_B2, OUTPUT);
+  pinMode(RELOAD_PIN, INPUT);
   pinMode(TRIGGER_PIN, INPUT);
+  pinMode(DISPLAY_PIN, INPUT);
   upperFlywheel.attach(UPPER_FLYWHEEL);
   lowerFlywheel.attach(LOWER_FLYWHEEL);
   // Start the system.
   Serial.begin(9600);
   startDisplay();
-  homePusher();
   calibrateFlywheels();
   info("AM-1 is hot, have fun.\n");
 }
@@ -303,21 +303,6 @@ void renderInfo() {
   display.println(flywheelLowerBias);
 }
 
-void homePusher() {
-  info("Calibration of pusher.\n");
-  for (int i = 0 ; i < 30; i++) {
-    pusherExtend(STEPS_PER_PUSH);
-    pusherRetract(STEPS_PER_PUSH);
-  }
-  return;
-  byte homed = digitalRead(PUSHER_HOME_MARKER);
-  while (homed == LOW) {
-    pusherRetract(1);
-    homed = digitalRead(PUSHER_HOME_MARKER);
-  }
-  info("Calibration of pusher compeleted.\n");
-}
-
 // Used by the Afro ESC 12A Speed Controller.
 // This does not work if the Arduino is powered via USB.
 void calibrateFlywheels() {
@@ -354,7 +339,7 @@ void readPotInputValue(int id) {
   switch (id) {
     case 1:
       // Change Mag Size.
-      magSize = map(value, 0, 1023, 1, 35);
+      magSize = map(value, 0, 1023, 1, 50);
       remainingDarts = magSize;
       break;
     case 2:
@@ -367,11 +352,11 @@ void readPotInputValue(int id) {
       break;
     case 3:
       // Change DPS.
-      pusherDps = map(value, 0, 1023, 1, 4);
+      pusherDps = map(value, 0, 1023, 1, 10);
       break;
     case 4:
       // Change FPS.
-      flywheelFps = map(value, 0, 1023, FLYWHEEL_MIN_VALUE, FLYWHEEL_MAX_VALUE);
+      flywheelFps = map(value, 0, 1023, FLYWHEEL_MIN_VALUE + 80, FLYWHEEL_MAX_VALUE);
       break;
     case 5:
       // Change Bias.
@@ -503,6 +488,9 @@ void pushDart() {
   remainingDarts--;
   totalDartsFired++;
   info("Dart fired.\n");
+  // Darts per second is achived by pausing inbetween pushes.
+  // The pusher always moves as fast as it can.
+  delay(1000 / pusherDps);
 }
 
 bool isCharged() {
