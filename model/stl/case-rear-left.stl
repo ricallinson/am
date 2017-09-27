@@ -1,25 +1,4 @@
 solid case-rear-left.stl
-facet normal -3.589791e-01 0.000000e+00 9.333456e-01
-    outer loop
-        vertex 1.120000e+02 1.700000e+01 6.000000e+01
-        vertex 1.250000e+02 1.700000e+01 6.500000e+01
-        vertex 1.250000e+02 2.100000e+01 6.500000e+01
-    endloop
-endfacet
-facet normal -3.589791e-01 0.000000e+00 9.333456e-01
-    outer loop
-        vertex 1.120000e+02 1.700000e+01 6.000000e+01
-        vertex 1.250000e+02 2.100000e+01 6.500000e+01
-        vertex 1.120000e+02 2.900000e+01 6.000000e+01
-    endloop
-endfacet
-facet normal -5.854343e-01 -6.415104e-01 4.957126e-01
-    outer loop
-        vertex 1.120000e+02 2.900000e+01 6.000000e+01
-        vertex 1.250000e+02 2.100000e+01 6.500000e+01
-        vertex 1.250000e+02 2.900000e+01 7.535294e+01
-    endloop
-endfacet
 facet normal 1.000000e+00 0.000000e+00 0.000000e+00
     outer loop
         vertex 1.350000e+02 -2.100000e+01 6.500000e+01
