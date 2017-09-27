@@ -1,4 +1,4 @@
-solid pusher
+solid pusher.stl
 facet normal -1.000000e+00 0.000000e+00 0.000000e+00
     outer loop
         vertex 1.500000e+00 -3.000000e+00 7.700000e+01
@@ -363,4 +363,4 @@ facet normal -1.000000e+00 0.000000e+00 0.000000e+00
         vertex 5.450000e+01 4.000000e+00 7.550000e+01
     endloop
 endfacet
-endsolid pusher
+endsolid pusher.stl

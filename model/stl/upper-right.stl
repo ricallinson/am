@@ -1,4 +1,4 @@
-solid upper-right
+solid upper-right.stl
 facet normal 0.000000e+00 -1.000000e+00 0.000000e+00
     outer loop
         vertex 4.850000e+01 7.500000e+00 4.040000e+01
@@ -7944,4 +7944,4 @@ facet normal 0.000000e+00 -5.547014e-01 8.320495e-01
         vertex 5.600000e+01 1.500000e+01 6.583334e+01
     endloop
 endfacet
-endsolid upper-right
+endsolid upper-right.stl
