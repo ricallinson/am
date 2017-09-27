@@ -27,7 +27,7 @@ Adafruit_SSD1306 display(4);
 #define FLYWHEEL_SPINUP_TIME   250
 #define FLYWHEEL_SPIN_TIME     3000
 #define CALIBRATION_DELAY_TIME 3000
-#define VDC_MIN 10.0
+#define VDC_MIN 9.5
 #define VDC_MAX 12.6
 #define VDC_SAMPLE_SIZE 10
 
@@ -67,6 +67,12 @@ void info(const char str[]) {
 }
 
 void info(int i) {
+  if (Serial) {
+    Serial.print(i);
+  }
+}
+
+void info(float i) {
   if (Serial) {
     Serial.print(i);
   }
@@ -270,10 +276,13 @@ void renderBatteryError() {
   display.setCursor(0, 0);
   display.setTextSize(1);
   if (vdc <= VDC_MIN) {
-    display.println("BAT LOW");
+    display.println("BATTERY LOW");
   } else if (vdc >= VDC_MAX) {
-    display.println("BAT ERR");
+    display.println("BATTERY ERROR");
   }
+  display.setTextSize(3);
+  display.setCursor(0, 10);
+  display.print(vdc);
   display.display();
 }
 
@@ -368,7 +377,7 @@ void readPotInputValue(int id) {
 }
 
 float getBatteryVoltage() {
-  int sum;
+  float sum;
   // take the VDC analog samples and add them up.
   for (int i = 0; i < VDC_SAMPLE_SIZE; i++) {
       sum += vdcReadings[i];
@@ -376,7 +385,7 @@ float getBatteryVoltage() {
   // Calculate the voltage
   // Use 5.0 for a 5.0V ADC reference voltage
   // 5.015V is the calibrated reference voltage
-  return ((float)sum / (float)VDC_SAMPLE_SIZE * 5.015) / 1024.0;
+  return ((sum / (float)VDC_SAMPLE_SIZE * 5.015) / 1024.0) * 11.132;
 }
 
 void readBatteryVoltage() {
@@ -495,12 +504,12 @@ void pushDart() {
 
 bool isCharged() {
   float vdc = getBatteryVoltage();
-  if (vdc > VDC_MIN || vdc < VDC_MAX) {
+  if (vdc > VDC_MIN && vdc < VDC_MAX) {
     return true;
   }
   // Show change battery.
   renderBatteryError();
-  info("Battery ~");
+  info("Battery at ");
   info(vdc);
   info(" VDC\n");
   return false;
@@ -519,14 +528,14 @@ bool isFiring() {
 }
 
 void loop() {
+  readBatteryVoltage();
   if (isCharged() == false) {
     // If the battery low or high don't do anything.
-    //return;
+    return;
   }
   if (isFiring() == false) {
     readLoadingState();
     readDisplayIdInputValue();
-    readBatteryVoltage();
   }
   if (displayId > 0) {
     readPotInputValue(displayId);
