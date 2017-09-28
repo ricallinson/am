@@ -531,7 +531,7 @@ void loop() {
   readBatteryVoltage();
   if (isCharged() == false) {
     // If the battery low or high don't do anything.
-    return;
+//    return;
   }
   if (isFiring() == false) {
     readLoadingState();
