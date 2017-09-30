@@ -257,16 +257,16 @@ void renderMode() {
     case 4:
       display.println("Auto");
       break;
-  }
+  } 
 }
 
 void renderBattery() {
   display.setTextColor(WHITE);
-  display.setCursor(100, 0);
+  display.setCursor(90, 0);
   display.setTextSize(1);
-  display.print(map(getBatteryVoltage(), VDC_MIN, VDC_MAX, 0, 100));
+  display.print(getBatteryVoltage());
   display.setCursor(120, 0);
-  display.print("%");
+  display.print("V");
 }
 
 void renderBatteryError() {
