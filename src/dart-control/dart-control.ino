@@ -529,10 +529,10 @@ bool isFiring() {
 
 void loop() {
   readBatteryVoltage();
-  if (isCharged() == false) {
-    // If the battery low or high don't do anything.
+//  if (isCharged() == false) {
+//    // If the battery low or high don't do anything.
 //    return;
-  }
+//  }
   if (isFiring() == false) {
     readLoadingState();
     readDisplayIdInputValue();
