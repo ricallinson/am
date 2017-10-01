@@ -7,8 +7,8 @@
 Adafruit_SSD1306 display(4);
 
 // Arduino constant pins.
-#define DATA_PIN           A2  // Analog 2
-#define VDC_PIN            A3  // Analog 3
+#define VDC_PIN            A2  // Analog 2
+#define DATA_PIN           A3  // Analog 3
 #define STEPPER_PIN_A1     3   // Digital 3
 #define STEPPER_PIN_A2     4   // Digital 4
 #define STEPPER_PIN_B1     5   // Digital 5
