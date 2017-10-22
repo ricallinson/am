@@ -19,7 +19,7 @@ Adafruit_SSD1306 display(4);
 #define UPPER_FLYWHEEL     8   // Digital 8
 #define RELOAD_PIN         9   // Digital 9
 #define TRIGGER_PIN        10  // Digital 10
-#define DISPLAY_PIN        11  // Digital 11
+#define SCREEN_PIN         11  // Digital 11
 
 // Internal constants.
 #define STEPS_PER_PUSH         13
@@ -131,7 +131,7 @@ void setup() {
   pinMode(STEPPER_PIN_B2, OUTPUT);
   pinMode(RELOAD_PIN, INPUT);
   pinMode(TRIGGER_PIN, INPUT);
-  pinMode(DISPLAY_PIN, INPUT);
+  pinMode(SCREEN_PIN, INPUT);
   upperFlywheel.attach(UPPER_FLYWHEEL);
   lowerFlywheel.attach(LOWER_FLYWHEEL);
   // Start the system.
@@ -328,13 +328,13 @@ void calibrateFlywheels() {
 }
 
 void readDisplayIdInputValue() {
-  if (digitalRead(DISPLAY_PIN) == HIGH) {
+  if (digitalRead(SCREEN_PIN) == HIGH) {
     displayId++;
     if (displayId > 6) {
       displayId = 0;
     }
     resetInputValue = true;
-    while (digitalRead(DISPLAY_PIN) == HIGH) {
+    while (digitalRead(SCREEN_PIN) == HIGH) {
       delay(200);
     }
   }
