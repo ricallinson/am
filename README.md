@@ -4,7 +4,7 @@ A 3D printed foam dart gun powered by an Arduino. Inspired by [Project FDL](http
 
 ## Follow the Progress
 
-I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1SRj9DMD9a9MU) playlist folowing the progress of the build.
+I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1SRj9DMD9a9MU) playlist following the progress of the build.
 
 ## Helpful Links
 
