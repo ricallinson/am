@@ -8,6 +8,15 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 
 [![Automatic Marcus Playlist](https://img.youtube.com/vi/EvZnnx5ywEk/0.jpg)](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1SRj9DMD9a9MU)
 
+### AM-2 Version 2
+
+* Arduino Nano
+* 2x Brushless DC Motors
+* 2x ESC Motor Controllers
+* 600rpm 12v DC Motor
+
+In progress.
+
 ### AM-1 Version 1
 
 * Arduino Nano
@@ -18,15 +27,6 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 * DC-to-DC 12v to 6v step down converter
 
 Abandoned.
-
-### AM-2 Version 2
-
-* Arduino Nano
-* 2x Brushless DC Motors
-* 2x ESC Motor Controllers
-* 600rpm 12v DC Motor
-
-In progress.
 
 ## Helpful Links
 
