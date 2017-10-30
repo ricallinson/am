@@ -6,6 +6,8 @@ A 3D printed foam dart gun powered by an Arduino. Inspired by [Project FDL](http
 
 I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1SRj9DMD9a9MU) playlist following the progress of the build.
 
+[![Automatic Marcus Playlist](https://img.youtube.com/vi/EvZnnx5ywEk/0.jpg)](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1SRj9DMD9a9MU)
+
 ### AM-1 Version 1
 
 * Arduino Nano
@@ -25,8 +27,6 @@ Abandoned.
 * 600rpm 12v DC Motor
 
 In progress.
-
-[![Automatic Marcus Playlist](https://img.youtube.com/vi/EvZnnx5ywEk/0.jpg)](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1SRj9DMD9a9MU)
 
 ## Helpful Links
 
