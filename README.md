@@ -13,7 +13,7 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 * Arduino Nano
 * 2x Brushless DC Motors
 * 2x ESC Motor Controllers
-* 600rpm 12v DC Motor
+* Pusher Power
 
 In progress.
 
