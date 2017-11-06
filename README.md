@@ -10,7 +10,7 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 
 ### AM-4
 
-![AM-4 3D Render]()
+![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-4.png)
 
 * Arduino Nano
 * OLED Display
