@@ -22,13 +22,19 @@ In progress.
 
 ### AM-3
 
+![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-3.png)
+
 Abandoned.
 
 ### AM-2
 
+![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-2.png)
+
 Abandoned.
 
 ### AM-1
+
+![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-1.png)
 
 Abandoned.
 
