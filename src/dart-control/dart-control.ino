@@ -1,3 +1,9 @@
+//
+// Copyright 2017, Richard Allinson.
+// Copyrights licensed under the New BSD License.
+// See the accompanying LICENSE file for terms.
+//
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
