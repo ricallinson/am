@@ -41,3 +41,7 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 ## Helpful Links
 
 * http://42bots.com/tutorials/bipolar-stepper-motor-control-with-arduino-and-an-h-bridge/
+
+# Creative Commons Lincense
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
