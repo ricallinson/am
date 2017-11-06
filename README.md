@@ -16,27 +16,26 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 * OLED Display
 * 2x Brushless DC Motors
 * 2x ESC Motor Controllers
-* Some kind of pusher DC motor
+* DC 12V 1000RPM Micro Speed Reduction Motor with Mini Gear Box
 
-In progress.
-
-### AM-3
+### AM-3 (Abandoned)
 
 ![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-3.png)
 
-Abandoned.
-
-### AM-2
+### AM-2 (Abandoned)
 
 ![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-2.png)
 
-Abandoned.
-
-### AM-1
+### AM-1 (Abandoned)
 
 ![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-1.png)
 
-Abandoned.
+- Arduino Nano
+- 2x Brushless DC Motors
+- 2x ESC Motor Controllers
+- NEMA 17 Stepper Motor
+- H-Bridge L293D
+- DC-to-DC 12v to 6v step down converter
 
 ## Helpful Links
 
