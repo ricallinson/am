@@ -30,12 +30,13 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 
 ![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-1.png)
 
-- Arduino Nano
-- 2x Brushless DC Motors
-- 2x ESC Motor Controllers
-- NEMA 17 Stepper Motor
-- H-Bridge L293D
-- DC-to-DC 12v to 6v step down converter
+* Arduino Nano
+* OLED Display
+* 2x Brushless DC Motors
+* 2x ESC Motor Controllers
+* NEMA 17 Stepper Motor
+* H-Bridge L293D
+* DC-to-DC 12v to 6v step down converter
 
 ## Helpful Links
 
