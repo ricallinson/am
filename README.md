@@ -42,7 +42,7 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 
 * http://42bots.com/tutorials/bipolar-stepper-motor-control-with-arduino-and-an-h-bridge/
 
-# Lincenses
+# Licenses
 
 ## Software
 
