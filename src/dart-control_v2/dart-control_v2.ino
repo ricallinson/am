@@ -6,11 +6,7 @@
 
 #include <SPI.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <Servo.h>
-
-Adafruit_SSD1306 display(4);
 
 // Arduino constant pins.
 #define VOLTAGE_PIN           A2  // Analog 2
@@ -41,16 +37,37 @@ int voltageSamplesIndex;
 int numOfDartsToPush = 1;
 int flywheelsActivationTime;
 int flywheelSpeed;
+int dartsRemaining;
+int currentScreenId;
+float voltage;
+
+// User settings.
+int magSize;
+int fireMode;
+int dartFps;
 
 // Brushless DC motors used for flywheels.
 Servo upperFlywheel;
 Servo lowerFlywheel;
+
+void setupFlywheels() {
+  upperFlywheel.writeMicroseconds(FLYWHEEL_MAX_VALUE);
+  lowerFlywheel.writeMicroseconds(FLYWHEEL_MAX_VALUE);
+  delay(1000);
+  upperFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+  lowerFlywheel.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+  delay(1000);
+}
 
 void setup() {
   pinMode(PUSHER_EXTENDED_PIN, INPUT);
   pinMode(MAG_INSERTED_PIN, INPUT);
   pinMode(TRIGGER_PIN, INPUT);
   pinMode(SCREEN_SELECT_PIN, INPUT);
+  upperFlywheel.attach(UPPER_FLYWHEEL_PIN);
+  lowerFlywheel.attach(LOWER_FLYWHEEL_PIN);
+  setupScreens();
+  setupFlywheels();
 }
 
 // Returns the state of the pusher position.
@@ -73,22 +90,6 @@ bool isScreenSelectorPushed() {
   return digitalRead(SCREEN_SELECT_PIN) == HIGH;
 }
 
-// Displays current battery error on the OLED screen.
-void showBatteryErrorSceeen() {
-  
-}
-
-// Read the current battery voltage and add it to the sample array.
-void readBatteryVoltage() {
-  analogRead(VOLTAGE_PIN); // Read the PIN as we could get an old value.
-  delay(10); // Make sure the MUTEX has switched to our PIN.
-  voltageSamples[voltageSamplesIndex] = analogRead(VOLTAGE_PIN);
-  voltageSamplesIndex++;
-  if (voltageSamplesIndex >= VOLTAGE_SAMPLE_SET) {
-    voltageSamplesIndex = 0;
-  }
-}
-
 // Walk the voltage samples and return an average.
 float getBatteryVoltage() {
   float sum;
@@ -102,9 +103,20 @@ float getBatteryVoltage() {
   return ((sum / (float)VOLTAGE_SAMPLE_SET * 5.015) / 1024.0) * 11.132;
 }
 
+// Read the current battery voltage and add it to the sample array.
+void readBatteryVoltage() {
+  analogRead(VOLTAGE_PIN); // Read the PIN as we could get an old value.
+  delay(10); // Make sure the MUTEX has switched to our PIN.
+  voltageSamples[voltageSamplesIndex] = analogRead(VOLTAGE_PIN);
+  voltageSamplesIndex++;
+  if (voltageSamplesIndex >= VOLTAGE_SAMPLE_SET) {
+    voltageSamplesIndex = 0;
+  }
+  voltage = getBatteryVoltage();
+}
+
 // Returns if the battery is in a good state.
 bool batteryError() {
-  float voltage = getBatteryVoltage();
   if (voltage < VOLTAGE_MIN || voltage > VOLTAGE_MAX) {
     return true;
   }
@@ -182,13 +194,16 @@ void fire(int dartsToFire) {
 void loop() {
   readBatteryVoltage();
   if (batteryError()) {
-    showBatteryErrorSceeen();
-    return;
+//    renderBatteryError(voltage);
+//    delay(1000);
+//    return;
   }
   if (isTriggerPressed()) {
     activateFlywheels();
     fire(numOfDartsToPush);
   }
   updateFlywheels();
+  updateScreens(currentScreenId, dartsRemaining, magSize, fireMode, dartFps, voltage);
+  delay(1); // Allow the world rotate.
 }
 
