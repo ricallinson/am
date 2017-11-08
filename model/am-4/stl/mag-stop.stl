@@ -1,4 +1,60 @@
 solid mag-stop.stl
+facet normal 1.000000e+00 -0.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 2.500000e+00 8.750000e+01
+        vertex 3.400000e+01 9.500000e+00 8.200000e+01
+        vertex 3.400000e+01 9.500000e+00 8.850000e+01
+    endloop
+endfacet
+facet normal 1.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 2.500000e+00 8.200000e+01
+        vertex 3.400000e+01 9.500000e+00 8.200000e+01
+        vertex 3.400000e+01 2.500000e+00 8.750000e+01
+    endloop
+endfacet
+facet normal 1.000000e+00 -0.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 -9.500000e+00 8.850000e+01
+        vertex 3.400000e+01 2.500000e+00 8.750000e+01
+        vertex 3.400000e+01 9.500000e+00 8.850000e+01
+    endloop
+endfacet
+facet normal 1.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 -9.500000e+00 8.850000e+01
+        vertex 3.400000e+01 -2.500000e+00 8.750000e+01
+        vertex 3.400000e+01 2.500000e+00 8.750000e+01
+    endloop
+endfacet
+facet normal 1.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 -9.500000e+00 8.200000e+01
+        vertex 3.400000e+01 -2.500000e+00 8.750000e+01
+        vertex 3.400000e+01 -9.500000e+00 8.850000e+01
+    endloop
+endfacet
+facet normal 1.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 -9.500000e+00 8.200000e+01
+        vertex 3.400000e+01 9.500000e+00 8.200000e+01
+        vertex 3.400000e+01 -2.500000e+00 8.750000e+01
+    endloop
+endfacet
+facet normal 0.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 -2.500000e+00 8.200000e+01
+        vertex 3.400000e+01 9.500000e+00 8.200000e+01
+        vertex 3.400000e+01 2.500000e+00 8.200000e+01
+    endloop
+endfacet
+facet normal -1.000000e+00 0.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 -2.500000e+00 8.200000e+01
+        vertex 3.400000e+01 -2.500000e+00 8.750000e+01
+        vertex 3.400000e+01 9.500000e+00 8.200000e+01
+    endloop
+endfacet
 facet normal 0.000000e+00 0.000000e+00 -1.000000e+00
     outer loop
         vertex 3.400000e+01 -9.500000e+00 8.200000e+01
@@ -15,16 +71,16 @@ facet normal 0.000000e+00 0.000000e+00 -1.000000e+00
 endfacet
 facet normal 1.000000e+00 0.000000e+00 0.000000e+00
     outer loop
-        vertex 3.400000e+01 -9.500000e+00 8.200000e+01
-        vertex 3.400000e+01 9.500000e+00 8.200000e+01
-        vertex 3.400000e+01 -9.500000e+00 8.850000e+01
+        vertex 3.900000e+01 -2.500000e+00 8.200000e+01
+        vertex 3.900000e+01 2.500000e+00 8.200000e+01
+        vertex 3.900000e+01 -2.500000e+00 8.750000e+01
     endloop
 endfacet
 facet normal 1.000000e+00 -0.000000e+00 0.000000e+00
     outer loop
-        vertex 3.400000e+01 -9.500000e+00 8.850000e+01
-        vertex 3.400000e+01 9.500000e+00 8.200000e+01
-        vertex 3.400000e+01 9.500000e+00 8.850000e+01
+        vertex 3.900000e+01 -2.500000e+00 8.750000e+01
+        vertex 3.900000e+01 2.500000e+00 8.200000e+01
+        vertex 3.900000e+01 2.500000e+00 8.750000e+01
     endloop
 endfacet
 facet normal -1.000000e+00 0.000000e+00 0.000000e+00
@@ -445,6 +501,62 @@ facet normal 6.593470e-01 -0.000000e+00 7.518387e-01
         vertex -1.085197e-01 -9.500000e+00 8.850000e+01
         vertex 4.253766e-01 9.500000e+00 8.803178e+01
         vertex -1.085197e-01 9.500000e+00 8.850000e+01
+    endloop
+endfacet
+facet normal 0.000000e+00 0.000000e+00 -1.000000e+00
+    outer loop
+        vertex 3.400000e+01 -2.500000e+00 8.200000e+01
+        vertex 3.400000e+01 2.500000e+00 8.200000e+01
+        vertex 3.900000e+01 -2.500000e+00 8.200000e+01
+    endloop
+endfacet
+facet normal 0.000000e+00 0.000000e+00 -1.000000e+00
+    outer loop
+        vertex 3.900000e+01 -2.500000e+00 8.200000e+01
+        vertex 3.400000e+01 2.500000e+00 8.200000e+01
+        vertex 3.900000e+01 2.500000e+00 8.200000e+01
+    endloop
+endfacet
+facet normal 0.000000e+00 -1.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 -2.500000e+00 8.200000e+01
+        vertex 3.900000e+01 -2.500000e+00 8.200000e+01
+        vertex 3.400000e+01 -2.500000e+00 8.750000e+01
+    endloop
+endfacet
+facet normal 0.000000e+00 -1.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.900000e+01 -2.500000e+00 8.200000e+01
+        vertex 3.900000e+01 -2.500000e+00 8.750000e+01
+        vertex 3.400000e+01 -2.500000e+00 8.750000e+01
+    endloop
+endfacet
+facet normal 0.000000e+00 0.000000e+00 1.000000e+00
+    outer loop
+        vertex 3.400000e+01 -2.500000e+00 8.750000e+01
+        vertex 3.900000e+01 -2.500000e+00 8.750000e+01
+        vertex 3.400000e+01 2.500000e+00 8.750000e+01
+    endloop
+endfacet
+facet normal 0.000000e+00 -0.000000e+00 1.000000e+00
+    outer loop
+        vertex 3.900000e+01 -2.500000e+00 8.750000e+01
+        vertex 3.900000e+01 2.500000e+00 8.750000e+01
+        vertex 3.400000e+01 2.500000e+00 8.750000e+01
+    endloop
+endfacet
+facet normal 0.000000e+00 1.000000e+00 0.000000e+00
+    outer loop
+        vertex 3.400000e+01 2.500000e+00 8.200000e+01
+        vertex 3.400000e+01 2.500000e+00 8.750000e+01
+        vertex 3.900000e+01 2.500000e+00 8.200000e+01
+    endloop
+endfacet
+facet normal 0.000000e+00 1.000000e+00 -0.000000e+00
+    outer loop
+        vertex 3.900000e+01 2.500000e+00 8.200000e+01
+        vertex 3.400000e+01 2.500000e+00 8.750000e+01
+        vertex 3.900000e+01 2.500000e+00 8.750000e+01
     endloop
 endfacet
 endsolid mag-stop.stl
