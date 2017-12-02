@@ -1,5 +1,5 @@
 //
-// Copyright 2016, Yahoo Inc.
+// Copyright 2017, Ricahrd S Allinson.
 // Copyrights licensed under the New BSD License.
 // See the accompanying LICENSE file for terms.
 //
