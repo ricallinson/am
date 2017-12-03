@@ -25,6 +25,18 @@ void setup() {
   pinMode(PUSHER_PIN, OUTPUT);
   pinMode(FLYWHEEL_PIN, OUTPUT);
   flywheels.attach(FLYWHEEL_PIN);
+  calibrateFlywheels();
+}
+
+// Used by the Afro ESC 12A Speed Controller.
+// This does not work if the Arduino is powered via USB.
+void calibrateFlywheels() {
+  digitalWrite(LED_PIN, HIGH);
+  flywheels.writeMicroseconds(FLYWHEEL_MAX_VALUE);
+  delay(1000);
+  flywheels.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+  delay(2000);
+  digitalWrite(LED_PIN, LOW);
 }
 
 bool flywheelsActive() {
@@ -34,11 +46,11 @@ bool flywheelsActive() {
 void loop() {
   if (flywheelsActive()) {
     digitalWrite(LED_PIN, HIGH);
-    flywheels.writeMicroseconds(FLYWHEEL_MAX_VALUE / 4);
+    flywheels.writeMicroseconds(FLYWHEEL_MAX_VALUE);//FLYWHEEL_MIN_VALUE + 400);
   } else {
     digitalWrite(LED_PIN, LOW);
     flywheels.writeMicroseconds(FLYWHEEL_MIN_VALUE);
   }
-  analogWrite(PUSHER_PIN, PUSHER_MAX_VALUE / 4);
+  digitalWrite(PUSHER_PIN, PUSHER_MAX_VALUE);
 }
 
