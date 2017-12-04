@@ -10,8 +10,9 @@
 #define FLYWHEEL_BUTTON_PIN  12 // Digital 12
 #define FLYWHEEL_PIN         10 // Digital 10
 
-#define FLYWHEEL_MIN_VALUE    1060
-#define FLYWHEEL_MAX_VALUE    1860
+#define FLYWHEEL_MIN_VALUE   1060
+#define FLYWHEEL_MAX_VALUE   1860
+#define FLYWHEEL_SPIN_VALUE  FLYWHEEL_MIN_VALUE + ((FLYWHEEL_MAX_VALUE - FLYWHEEL_MIN_VALUE) * 0.99)
 
 Servo flywheels;
 
@@ -41,7 +42,7 @@ bool flywheelsActive() {
 void loop() {
   if (flywheelsActive()) {
     digitalWrite(LED_PIN, HIGH);
-    flywheels.writeMicroseconds(FLYWHEEL_MAX_VALUE);//FLYWHEEL_MIN_VALUE + 400);
+    flywheels.writeMicroseconds(FLYWHEEL_SPIN_VALUE);
   } else {
     digitalWrite(LED_PIN, LOW);
     flywheels.writeMicroseconds(FLYWHEEL_MIN_VALUE);
