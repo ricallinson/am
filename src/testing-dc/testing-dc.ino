@@ -10,11 +10,13 @@
 #define FLYWHEEL_BUTTON_PIN  12 // Digital 12
 #define FLYWHEEL_PIN         10 // Digital 10
 
+#define THROTTLE_VALUE       1 // 0.5 == 50%
 #define FLYWHEEL_MIN_VALUE   1060
 #define FLYWHEEL_MAX_VALUE   1860
-#define FLYWHEEL_SPIN_VALUE  FLYWHEEL_MIN_VALUE + ((FLYWHEEL_MAX_VALUE - FLYWHEEL_MIN_VALUE) * 0.99)
+#define FLYWHEEL_SPIN_VALUE  FLYWHEEL_MIN_VALUE + ((FLYWHEEL_MAX_VALUE - FLYWHEEL_MIN_VALUE) * THROTTLE_VALUE)
 
 Servo flywheels;
+bool flywheelsSpinning;
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
@@ -41,11 +43,21 @@ bool flywheelsActive() {
 
 void loop() {
   if (flywheelsActive()) {
-    digitalWrite(LED_PIN, HIGH);
+    if (!flywheelsSpinning) {
+      flywheels.writeMicroseconds(FLYWHEEL_SPIN_VALUE - 600);
+      delay(1000);
+      flywheels.writeMicroseconds(FLYWHEEL_SPIN_VALUE - 400);
+      delay(1000);
+      flywheels.writeMicroseconds(FLYWHEEL_SPIN_VALUE - 200);
+      delay(1000);
+    }
     flywheels.writeMicroseconds(FLYWHEEL_SPIN_VALUE);
+    flywheelsSpinning = true;
+    digitalWrite(LED_PIN, HIGH);
   } else {
-    digitalWrite(LED_PIN, LOW);
     flywheels.writeMicroseconds(FLYWHEEL_MIN_VALUE);
+    flywheelsSpinning = false;
+    digitalWrite(LED_PIN, LOW);
   }
 }
 
