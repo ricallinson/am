@@ -10,7 +10,7 @@
 #define FLYWHEEL_BUTTON_PIN  12 // Digital 12
 #define FLYWHEEL_PIN         10 // Digital 10
 
-#define THROTTLE_VALUE       0.75 // 0.5 == 50%
+#define THROTTLE_VALUE       1 // 0.5 == 50%
 #define FLYWHEEL_MIN_VALUE   1060
 #define FLYWHEEL_MAX_VALUE   1860
 #define FLYWHEEL_SPIN_VALUE  FLYWHEEL_MIN_VALUE + ((FLYWHEEL_MAX_VALUE - FLYWHEEL_MIN_VALUE) * THROTTLE_VALUE)
@@ -37,20 +37,12 @@ void calibrateFlywheels() {
   digitalWrite(LED_PIN, LOW);
 }
 
-bool flywheelsActive() {
+bool flywheelsButtonActive() {
   return digitalRead(FLYWHEEL_BUTTON_PIN) == HIGH;
 }
 
 void loop() {
-  if (flywheelsActive()) {
-    if (!flywheelsSpinning) {
-      flywheels.writeMicroseconds(FLYWHEEL_SPIN_VALUE - 600);
-      delay(1000);
-      flywheels.writeMicroseconds(FLYWHEEL_SPIN_VALUE - 400);
-      delay(1000);
-      flywheels.writeMicroseconds(FLYWHEEL_SPIN_VALUE - 200);
-      delay(1000);
-    }
+  if (flywheelsButtonActive()) {
     flywheels.writeMicroseconds(FLYWHEEL_SPIN_VALUE);
     flywheelsSpinning = true;
     digitalWrite(LED_PIN, HIGH);
