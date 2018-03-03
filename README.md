@@ -12,15 +12,15 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 
 ![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-8.png)
 
-### AM-7
+### AM-7 (Abandoned)
 
 ![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-7.png)
 
-### AM-6
+### AM-6 (Abandoned)
 
 No good either.
 
-### AM-5
+### AM-5 (Abandoned)
 
 Didn't work.
 
