@@ -12,9 +12,19 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 
 ![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-8.png)
 
+* Arduino Nano
+* 2x Brushless DC Motors
+* 2x ESC Motor Controllers
+* DC 12V 1000RPM Micro Speed Reduction Motor with Mini Gear Box
+
 ### AM-7 (Abandoned)
 
 ![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-7.png)
+
+* Arduino Nano
+* 2x Brushless DC Motors
+* 2x ESC Motor Controllers
+* DC 12V 1000RPM Micro Speed Reduction Motor with Mini Gear Box
 
 ### AM-6 (Abandoned)
 
