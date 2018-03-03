@@ -8,7 +8,23 @@ I have a [Youtube](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1S
 
 [![Automatic Marcus Playlist](https://img.youtube.com/vi/EvZnnx5ywEk/0.jpg)](https://www.youtube.com/playlist?list=PLXH8rqHzuX5hmMyk606a1SRj9DMD9a9MU)
 
-### AM-4
+### AM-8
+
+![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-8.png)
+
+### AM-7
+
+![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-7.png)
+
+### AM-6
+
+No good either.
+
+### AM-5
+
+Didn't work.
+
+### AM-4 (Abandoned)
 
 ![AM-4 3D Render](https://raw.githubusercontent.com/ricallinson/am/master/docs/am-4.png)
 
